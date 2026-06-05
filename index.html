@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.85, user-scalable=yes, minimum-scale=0.5, maximum-scale=3.0">
+    <title>TodayTab</title>
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sunflower:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font: 'Sunflower', sans-serif;
+            --accent: #6366F1;
+            --accent-light: rgba(99,102,241,0.12);
+            --success: #10B981;
+            --danger: #EF4444;
+            --text-primary: rgba(0,0,0,0.80);
+            --text-secondary: rgba(0,0,0,0.55);
+            --text-muted: rgba(0,0,0,0.38);
+            --glass-bg: rgba(255,255,255,0.48);
+            --glass-border: rgba(255,255,255,0.82);
+            --glass-blur: blur(14px);
+            --radius-card: 8px;
+            --radius-icon: 8px;
+            --transition: all 0.2s ease;
+
+            /* 봄 오로라 배경 (홈/할일) */
+            --bg-a: #f0ede8;
+            --blob-a1: #a8e6cf; --blob-a2: #ffd3a5;
+            --blob-a3: #d4b8f0; --blob-a4: #ffa07a;
+
+            /* 바다+노을 배경 (일기) */
+            --bg-b: #eaf0f5;
+            --blob-b1: #87ceeb; --blob-b2: #98e8c8;
+            --blob-b3: #ffb347; --blob-b4: #ffb6c1;
+
+            /* 오렌지+민트+복숭아 배경 (가계부) */
+            --bg-c: #f5f0e8;
+            --blob-c1: #ffa040; --blob-c2: #a8e6cf;
+            --blob-c3: #ffd3a5; --blob-c4: #ffb6c1;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            background: #e8e8e8;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ── 오로라 배경 ── */
+        .aurora-bg {
+            position: fixed;
+            top: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 420px;
+            height: 100vh;
+            z-index: 0;
+            overflow: hidden;
+            transition: background 0.5s ease;
+        }
+        .aurora-bg.theme-a { background: var(--bg-a); }
+        .aurora-bg.theme-b { background: var(--bg-b); }
+        .aurora-bg.theme-c { background: var(--bg-c); }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(48px);
+            opacity: 0.58;
+        }
+
+        /* ── 헤더 ── */
+        .header {
+            position: relative; z-index: 10;
+            padding: 24px 20px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+        .logo span { color: var(--accent); }
+        .header-actions { display: flex; gap: 8px; }
+        .hbtn {
+            width: 34px; height: 34px;
+            border-radius: var(--radius-card);
+            border: none;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+        .hbtn:hover { background: rgba(255,255,255,0.7); color: var(--accent); }
+
+        /* ── 페이지 ── */
+        .page-content { display: none; flex: 1; overflow: hidden; position: relative; z-index: 5; }
+        .page-content.active { display: flex; flex-direction: column; }
+        #homePage { padding: 0 16px 100px; overflow-y: auto; }
+
+        /* ── 인사말 ── */
+        .greeting-area { margin-bottom: 18px; }
+        .date-text {
+            font-size: 11px; font-weight: 300;
+            color: var(--text-muted); margin-bottom: 3px;
+        }
+        .greeting-text {
+            font-size: 16px; font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* ── 통계 카드 ── */
+        .quick-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px; margin-bottom: 16px;
+        }
+        .stat-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border-radius: var(--radius-card);
+            padding: 14px;
+        }
+        .stat-card p {
+            font-size: 11px; font-weight: 500;
+            color: var(--text-muted); margin-bottom: 4px;
+        }
+        .stat-card h4 {
+            font-size: 17px; font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* ── 앱 카드 ── */
+        .card-wrap { margin-bottom: 10px; }
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border-radius: var(--radius-card);
+            padding: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 0;
+        }
+        .card:hover { background: rgba(255,255,255,0.62); transform: translateY(-1px); }
+        .card:active { transform: translateY(0); }
+        .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .card-icon {
+            width: 44px; height: 44px;
+            border-radius: var(--radius-icon);
+            background: rgba(255,255,255,0.65);
+            color: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; flex-shrink: 0;
+        }
+        .card-title h3 { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+        .card-title p  { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+        .card-arrow { margin-left: auto; color: var(--text-muted); font-size: 0.85rem; }
+        .card-status {
+            display: flex; align-items: center; gap: 8px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.6);
+            font-size: 12px; font-weight: 500; color: var(--text-secondary);
+        }
+        .card-status i { color: var(--accent); font-size: 0.8rem; }
+
+        /* 접힌 카드 */
+        .card-wrap.hidden-card .card { display: none; }
+        .hidden-placeholder {
+            display: none; align-items: center; gap: 10px;
+            padding: 11px 16px;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border-radius: var(--radius-card);
+            color: var(--text-muted); font-size: 12px; font-weight: 500;
+            cursor: pointer; transition: var(--transition);
+        }
+        .hidden-placeholder:hover { background: rgba(255,255,255,0.62); color: var(--accent); }
+        .card-wrap.hidden-card .hidden-placeholder { display: flex; }
+        .toggle-btn {
+            margin-left: auto; width: 26px; height: 26px;
+            border-radius: 50%; border: none;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 0.68rem; color: var(--text-muted); transition: var(--transition);
+            flex-shrink: 0;
+        }
+        .toggle-btn.on { background: var(--accent); color: white; }
+
+        /* ── 즐겨찾기 ── */
+        .yard-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin: 20px 0 10px;
+        }
+        .yard-title {
+            font-size: 12px; font-weight: 700;
+            color: var(--text-muted);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .yard-toggle-btn {
+            width: 26px; height: 26px; border-radius: 50%;
+            border: none; background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            color: var(--text-muted); cursor: pointer; font-size: 0.7rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: var(--transition);
+        }
+        .yard-section.collapsed { display: none; }
+        .yard-restore {
+            display: none; align-items: center; justify-content: center;
+            gap: 8px; padding: 9px 16px; margin-top: 4px;
+            background: var(--glass-bg); backdrop-filter: var(--glass-blur);
+            border-radius: var(--radius-card);
+            color: var(--text-muted); font-size: 12px; cursor: pointer;
+        }
+        .yard-restore.show { display: flex; }
+        .quick-links-header {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 10px;
+        }
+        .quick-links-title {
+            font-size: 12px; font-weight: 700;
+            color: var(--text-secondary);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .quick-links-toggle {
+            background: none; border: none;
+            color: var(--text-muted); cursor: pointer; padding: 2px 6px;
+            border-radius: 4px; transition: var(--transition);
+        }
+        .quick-links-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .quick-links-grid.collapsed { display: none; }
+        .edit-links-btn {
+            background: var(--glass-bg); backdrop-filter: var(--glass-blur);
+            border: none; padding: 5px 12px;
+            border-radius: var(--radius-card);
+            font-size: 11px; font-weight: 700;
+            color: var(--text-muted); cursor: pointer; font-family: var(--font);
+            transition: var(--transition);
+        }
+        .edit-links-btn:hover, .edit-links-btn.active { color: var(--accent); }
+        .quick-link {
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            padding: 10px 6px;
+            background: var(--glass-bg); backdrop-filter: var(--glass-blur);
+            border-radius: var(--radius-card);
+            cursor: pointer; text-decoration: none; transition: var(--transition);
+        }
+        .quick-link:hover { background: rgba(255,255,255,0.65); transform: translateY(-1px); }
+        .quick-link-icon {
+            width: 34px; height: 34px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 0.9rem;
+        }
+        .quick-link-title { font-size: 11px; font-weight: 700; color: var(--text-primary); text-align: center; line-height: 1.2; }
+        .add-link-btn { background: rgba(255,255,255,0.3); }
+        .add-link-btn .quick-link-icon { background: rgba(255,255,255,0.5); color: var(--text-muted); }
+
+        /* ── 로고 배너 ── */
+        .logo-banner-section { margin-top: 16px; text-align: center; padding: 12px; }
+        .logo-banner-img { height: 70px; width: auto; cursor: pointer; transition: transform 0.3s; }
+        .logo-banner-img.enlarged { transform: scale(1.15); }
+        .logo-small-img { height: 48px; width: auto; cursor: pointer; opacity: 0.8; }
+        .bike-toggle-mini { text-align: center; margin: 8px 0; cursor: pointer; opacity: 0.55; transition: opacity 0.3s; display: flex; justify-content: center; }
+        .bike-toggle-mini:hover { opacity: 1; }
+        .bike-mode-overlay { display: none; }
+        .bike-mode-overlay.active { display: block; }
+        .bike-mode-overlay iframe { width: 100%; height: 200px; border: none; }
+        .rose-toggle-mini { text-align: center; margin: 0 0 8px; cursor: pointer; opacity: 0.55; transition: opacity 0.3s; display: none; }
+        .rose-toggle-mini:hover { opacity: 1; }
+        .rose-toggle-mini img { height: 48px; width: auto; }
+        .logo-banner-container { position: relative; display: inline-block; }
+        .logo-banner-hide-btn {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+            background: rgba(0,0,0,0.65); color: white; border: none;
+            padding: 8px 18px; border-radius: var(--radius-card);
+            font-size: 0.78rem; font-family: var(--font); cursor: pointer;
+            opacity: 0; pointer-events: none; transition: opacity 0.2s;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .logo-banner-container.show-hide-btn:hover .logo-banner-hide-btn { opacity: 1; }
+        .logo-banner-container.show-hide-btn .logo-banner-hide-btn { pointer-events: auto; }
+
+        /* ── iframe ── */
+        .iframe-container { flex: 1; width: 100%; overflow: hidden; }
+        .iframe-container iframe { width: 100%; height: 100%; border: none; }
+
+        /* ── 하단 nav ── */
+        .bottom-nav {
+            position: fixed; bottom: 0;
+            left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 420px;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border-top: 1px solid var(--glass-border);
+            display: flex; justify-content: space-around;
+            padding: 8px 0; z-index: 1000;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 3px; padding: 6px 16px; border: none;
+            background: transparent; color: var(--text-muted);
+            font-family: var(--font); font-size: 11px; font-weight: 700;
+            cursor: pointer; transition: var(--transition); border-radius: var(--radius-card);
+        }
+        .nav-item i { font-size: 1.2rem; }
+        .nav-item.active { color: var(--accent); }
+
+        /* ── 랭귀지 메뉴 ── */
+        .lang-selector { position: relative; }
+        .lang-menu {
+            display: none; position: absolute; top: 110%; right: 0;
+            margin-top: 4px; background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border-radius: var(--radius-card);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden; z-index: 1000; min-width: 130px;
+        }
+        .lang-menu.active { display: block; }
+        .lang-menu button {
+            width: 100%; padding: 10px 16px; border: none;
+            background: none; text-align: left; cursor: pointer;
+            font-size: 13px; font-weight: 500; color: var(--text-primary);
+            transition: var(--transition); font-family: var(--font);
+        }
+        .lang-menu button:hover { background: rgba(255,255,255,0.5); color: var(--accent); }
+
+        /* ── 링크 모달 ── */
+        .link-modal {
+            display: none; position: fixed; z-index: 1100;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.3); align-items: center; justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .link-modal.active { display: flex; }
+        .link-modal-content {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: var(--glass-blur);
+            border-radius: 16px; padding: 24px;
+            width: 90%; max-width: 360px; max-height: 85vh; overflow-y: auto;
+        }
+        .link-modal-title { font-size: 15px; font-weight: 700; margin-bottom: 20px; color: var(--text-primary); }
+        .link-form-group { margin-bottom: 16px; }
+        .link-form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; }
+        .link-form-input {
+            width: 100%; padding: 10px 14px;
+            border: 1px solid rgba(255,255,255,0.8);
+            background: rgba(255,255,255,0.6);
+            border-radius: var(--radius-card);
+            font-family: var(--font); font-size: 14px; color: var(--text-primary);
+        }
+        .link-form-input:focus { outline: none; border-color: var(--accent); }
+        .icon-picker { display: grid; grid-template-columns: repeat(6,1fr); gap: 8px; }
+        .icon-option {
+            width: 36px; height: 36px; border-radius: 50%;
+            border: 2px solid rgba(0,0,0,0.1); display: flex;
+            align-items: center; justify-content: center;
+            cursor: pointer; color: var(--text-secondary); transition: var(--transition);
+        }
+        .icon-option:hover, .icon-option.selected { border-color: var(--accent); background: var(--accent); color: white; }
+        .color-picker { display: flex; gap: 8px; flex-wrap: wrap; }
+        .color-option {
+            width: 30px; height: 30px; border-radius: 50%;
+            cursor: pointer; border: 3px solid transparent; transition: var(--transition);
+        }
+        .color-option:hover, .color-option.selected { border-color: var(--text-primary); }
+        .link-btn {
+            width: 100%; padding: 11px; border: none;
+            border-radius: var(--radius-card); font-family: var(--font);
+            font-size: 13px; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            transition: var(--transition);
+        }
+        .link-btn-primary { background: var(--accent); color: white; }
+        .link-btn-danger  { background: var(--danger); color: white; margin-top: 8px; }
+        .link-btn-secondary { background: rgba(0,0,0,0.06); color: var(--text-secondary); margin-top: 8px; }
+
+        /* ── info 툴팁 ── */
+        .info-btn { position: relative; }
+        .info-tooltip {
+            position: absolute; top: 50px; right: 0; width: 280px;
+            background: rgba(255,255,255,0.9); backdrop-filter: var(--glass-blur);
+            border-radius: 12px; padding: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            opacity: 0; visibility: hidden;
+            transform: translateY(-8px); transition: var(--transition); z-index: 100;
+        }
+        .info-btn:hover .info-tooltip { opacity: 1; visibility: visible; transform: translateY(0); }
+        .info-tooltip h4 { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+        .info-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+        .info-item i { font-size: 0.85rem; margin-top: 2px; flex-shrink: 0; color: var(--accent); }
+        .info-contact { margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.08); text-align: center; }
+        .info-contact p { font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+        .info-contact a { font-size: 11px; color: var(--text-muted); text-decoration: none; }
+        .info-contact a:hover { color: var(--accent); }
+
+        ::-webkit-scrollbar { width: 3px; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
+    </style>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6366F1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="TodayTab">
+    <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+<!-- 오로라 배경 -->
+<div class="aurora-bg theme-a" id="auroraBg">
+    <div class="blob" id="blob1" style="width:200px;height:200px;top:-60px;left:-50px;background:var(--blob-a1)"></div>
+    <div class="blob" id="blob2" style="width:160px;height:160px;top:20px;right:-30px;background:var(--blob-a2)"></div>
+    <div class="blob" id="blob3" style="width:180px;height:180px;bottom:-40px;left:20px;background:var(--blob-a3)"></div>
+    <div class="blob" id="blob4" style="width:140px;height:140px;bottom:60px;right:-20px;background:var(--blob-a4)"></div>
+</div>
+
+<div class="app-container">
+    <!-- 헤더 -->
+    <div class="header">
+        <div class="logo">Today<span>Tab</span></div>
+        <div class="header-actions">
+            <div class="lang-selector">
+                <button class="hbtn" onclick="toggleLangMenu()" title="언어 선택"><i class="fas fa-globe"></i></button>
+                <div class="lang-menu" id="langMenu">
+                    <button onclick="setLanguage('ko')">🇰🇷 한국어</button>
+                    <button onclick="setLanguage('en')">🇺🇸 English</button>
+                    <button onclick="setLanguage('ja')">🇯🇵 日本語</button>
+                    <button onclick="setLanguage('zh')">🇨🇳 中文</button>
+                </div>
+            </div>
+            <button class="hbtn" onclick="toggleTheme()" title="테마"><i class="fas fa-circle-half-stroke"></i></button>
+            <button class="hbtn info-btn">
+                <i class="fas fa-info"></i>
+                <div class="info-tooltip">
+                    <h4><i class="fas fa-lightbulb"></i> 사용 안내</h4>
+                    <div class="info-item"><i class="fas fa-database"></i><span>로컬 저장으로 오프라인에서도 사용 가능합니다</span></div>
+                    <div class="info-item"><i class="fas fa-shield-halved"></i><span>인터넷에 노출되지 않아 보안이 완벽합니다</span></div>
+                    <div class="info-item"><i class="fas fa-cloud-arrow-up"></i><span>백업은 메모장 저장 후 불러오기로 복원 가능합니다</span></div>
+                    <div class="info-item"><i class="fas fa-triangle-exclamation"></i><span>백업 없이 디바이스 변경 시 자료가 삭제됩니다</span></div>
+                    <div class="info-contact"><p>TodayTab</p><a href="https://mail.google.com/mail/?view=cm&fs=1&to=todaytab.help@gmail.com" target="_blank">todaytab.help@gmail.com</a></div>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- 홈 페이지 -->
+    <div id="homePage" class="page-content active">
+        <div class="greeting-area">
+            <p class="date-text" id="dateDisplay"></p>
+            <h2 class="greeting-text" data-i18n="greeting">오늘도 좋은 하루 되세요 ✨</h2>
+        </div>
+
+        <div class="quick-stats">
+            <div class="stat-card"><p data-i18n="todaysTasks">오늘의 할 일</p><h4 id="todoStats">0 / 0</h4></div>
+            <div class="stat-card"><p data-i18n="thisMonthBalance">이번 달 잔액</p><h4 id="moneyStats">0원</h4></div>
+        </div>
+
+        <!-- 할 일 카드 -->
+        <div class="card-wrap" id="wrapTodo">
+            <div class="hidden-placeholder" onclick="toggleCard('todo')">
+                <i class="fas fa-check-circle" style="color:var(--accent)"></i>
+                <span data-i18n="todo">할 일</span>
+                <small style="margin-left:auto;color:var(--accent);font-size:11px;">펼치기 ▶</small>
+            </div>
+            <div class="card" onclick="showPage('todo')">
+                <div class="card-header">
+                    <div class="card-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="card-title">
+                        <h3 data-i18n="todo">할 일</h3>
+                        <p data-i18n="manageGoals">오늘의 목표를 관리하세요</p>
+                    </div>
+                    <div class="card-arrow"><i class="fas fa-chevron-right"></i></div>
+                </div>
+                <div class="card-status">
+                    <i class="fas fa-chart-simple"></i>
+                    <span id="todoScoreDisplay">점수: 0 / 0 P</span>
+                    <button class="toggle-btn on" id="btnTodo" onclick="event.stopPropagation();toggleCard('todo')"><i class="fas fa-check"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 일기 카드 -->
+        <div class="card-wrap" id="wrapDiary">
+            <div class="hidden-placeholder" onclick="toggleCard('diary')">
+                <i class="fas fa-book" style="color:var(--accent)"></i>
+                <span data-i18n="diary">일기</span>
+                <small style="margin-left:auto;color:var(--accent);font-size:11px;">펼치기 ▶</small>
+            </div>
+            <div class="card" onclick="showPage('diary')">
+                <div class="card-header">
+                    <div class="card-icon"><i class="fas fa-book"></i></div>
+                    <div class="card-title">
+                        <h3 data-i18n="diary">일기</h3>
+                        <p data-i18n="recordToday">오늘 하루를 기록하세요</p>
+                    </div>
+                    <div class="card-arrow"><i class="fas fa-chevron-right"></i></div>
+                </div>
+                <div class="card-status">
+                    <i class="fas fa-pen"></i>
+                    <span id="diaryGoalDisplay" data-i18n="myRecord">나의 기록</span>
+                    <button class="toggle-btn on" id="btnDiary" onclick="event.stopPropagation();toggleCard('diary')"><i class="fas fa-check"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 가계부 카드 -->
+        <div class="card-wrap" id="wrapMoney">
+            <div class="hidden-placeholder" onclick="toggleCard('money')">
+                <i class="fas fa-wallet" style="color:var(--accent)"></i>
+                <span data-i18n="budget">가계부</span>
+                <small style="margin-left:auto;color:var(--accent);font-size:11px;">펼치기 ▶</small>
+            </div>
+            <div class="card" onclick="showPage('money')">
+                <div class="card-header">
+                    <div class="card-icon"><i class="fas fa-wallet"></i></div>
+                    <div class="card-title">
+                        <h3 data-i18n="budget">가계부</h3>
+                        <p data-i18n="manageFinances">수입과 지출을 관리하세요</p>
+                    </div>
+                    <div class="card-arrow"><i class="fas fa-chevron-right"></i></div>
+                </div>
+                <div class="card-status">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span><span data-i18n="monthlyBalance">이번 달 잔액</span>: <span id="moneyDisplay">0원</span></span>
+                    <button class="toggle-btn on" id="btnMoney" onclick="event.stopPropagation();toggleCard('money')"><i class="fas fa-check"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 마당 -->
+        <div class="yard-header">
+            <div class="yard-title"><i class="fas fa-link" style="color:var(--accent)"></i> <span data-i18n="favorites">즐겨찾기</span></div>
+            <div style="display:flex;gap:6px;align-items:center">
+                <button class="edit-links-btn" id="editLinksBtn" onclick="toggleLinkEditMode()"><i class="fas fa-cog"></i> <span data-i18n="edit">편집</span></button>
+                <button class="yard-toggle-btn" id="yardToggleBtn" onclick="toggleYard()"><i class="fas fa-chevron-up" id="yardIcon"></i></button>
+            </div>
+        </div>
+        <div class="yard-section" id="yardSection">
+            <div style="margin-bottom:10px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                    <button class="quick-links-toggle" id="quickLinksToggle" onclick="toggleQuickLinks()"><i class="fas fa-chevron-up"></i></button>
+                </div>
+                <div class="quick-links-grid" id="quickLinksGrid"></div>
+            </div>
+            <div class="logo-banner-section" id="logoBannerSection">
+                <div class="logo-banner-container" id="logoBannerContainer">
+                    <img src="logo-banner.png" alt="TodayTab" class="logo-banner-img" onclick="showHideButton()">
+                    <button class="logo-banner-hide-btn" onclick="toggleLogoBanner()"><i class="fas fa-eye-slash"></i> 숨기기</button>
+                </div>
+                <div id="logoSmallContainer" style="display:none"><img src="logo-small.png" class="logo-small-img" onclick="toggleLogoBanner()"></div>
+                <div class="bike-toggle-mini" id="bikeToggleMini" onclick="openBikeMode()"><canvas id="miniBikeCanvas" width="200" height="60"></canvas></div>
+                <div class="bike-mode-overlay" id="bikeModeOverlay"><iframe src="bike-animation.html" id="bikeModeFrame"></iframe></div>
+                <div class="rose-toggle-mini" id="roseToggleMini" onclick="closeBikeMode()"><img src="logo-small.png" alt=""></div>
+            </div>
+        </div>
+        <div class="yard-restore" id="yardRestore" onclick="toggleYard()"><i class="fas fa-chevron-down"></i> 마당 펼치기</div>
+    </div>
+
+    <!-- 서브 페이지 -->
+    <div id="todoPage"  class="page-content"><div class="iframe-container"><iframe src="todo.html"  id="todoFrame"></iframe></div></div>
+    <div id="diaryPage" class="page-content"><div class="iframe-container"><iframe src="diary.html" id="diaryFrame"></iframe></div></div>
+    <div id="moneyPage" class="page-content"><div class="iframe-container"><iframe src="money.html" id="moneyFrame"></iframe></div></div>
+
+    <!-- 링크 모달 -->
+    <div class="link-modal" id="linkModal">
+        <div class="link-modal-content">
+            <div class="link-modal-title" id="linkModalTitle"><i class="fas fa-plus"></i> 링크 추가</div>
+            <div class="link-form-group"><label>이름</label><input type="text" id="linkName" class="link-form-input" placeholder="예: 도서관"></div>
+            <div class="link-form-group"><label>URL</label><input type="url" id="linkUrl" class="link-form-input" placeholder="https://example.com"></div>
+            <div class="link-form-group"><label>아이콘</label><div class="icon-picker" id="iconPicker"></div></div>
+            <div class="link-form-group"><label>색상</label><div class="color-picker" id="colorPicker"></div></div>
+            <button class="link-btn link-btn-primary" onclick="saveLink()"><i class="fas fa-save"></i> 저장</button>
+            <button class="link-btn link-btn-danger" id="deleteLinkBtn" onclick="deleteLink()"><i class="fas fa-trash"></i> 삭제</button>
+            <button class="link-btn link-btn-secondary" onclick="closeLinkModal()">취소</button>
+        </div>
+    </div>
+
+    <!-- 하단 nav -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="showPage('home')" id="navHome"><i class="fas fa-house"></i><span data-i18n="home">홈</span></button>
+        <button class="nav-item" onclick="showPage('todo')"  id="navTodo"><i class="fas fa-check-circle"></i><span data-i18n="todo">할 일</span></button>
+        <button class="nav-item" onclick="showPage('diary')" id="navDiary"><i class="fas fa-book"></i><span data-i18n="diary">일기</span></button>
+        <button class="nav-item" onclick="showPage('money')" id="navMoney"><i class="fas fa-wallet"></i><span data-i18n="budget">가계부</span></button>
+    </nav>
+</div>
+
+<script src="lang.js"></script>
+<script>
+// ── 언어 ──────────────────────────────────────────────────────────────
+function toggleLangMenu(){ document.getElementById('langMenu').classList.toggle('active'); }
+document.addEventListener('click', e => {
+    const s = document.querySelector('.lang-selector');
+    if (s && !s.contains(e.target)) document.getElementById('langMenu').classList.remove('active');
+});
+
+// ── 테마 ──────────────────────────────────────────────────────────────
+const THEMES = ['light','gray'];
+let themeIdx = 0;
+function setTheme(t){
+    document.body.classList.remove('theme-gray');
+    if(t==='gray') document.body.classList.add('theme-gray');
+    localStorage.setItem('todaytab_theme', t);
+    document.querySelectorAll('iframe').forEach(f => {
+        try{ f.contentWindow.postMessage({type:'themeChange',theme:t},'*'); }catch(e){}
+    });
+}
+function toggleTheme(){ themeIdx=(themeIdx+1)%THEMES.length; setTheme(THEMES[themeIdx]); }
+
+// ── 페이지 전환 ───────────────────────────────────────────────────────
+function showPage(name){
+    document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const pages = {home:'homePage',todo:'todoPage',diary:'diaryPage',money:'moneyPage'};
+    const navs  = {home:'navHome', todo:'navTodo', diary:'navDiary', money:'navMoney'};
+    const p = document.getElementById(pages[name]);
+    const n = document.getElementById(navs[name]);
+    if(p) p.classList.add('active');
+    if(n) n.classList.add('active');
+
+    // 오로라 배경 전환
+    const bg = document.getElementById('auroraBg');
+    const themeMap = {home:'theme-a',todo:'theme-a',diary:'theme-b',money:'theme-c'};
+    bg.className = 'aurora-bg ' + (themeMap[name]||'theme-a');
+
+    if(name==='home') updateHomeStats();
+}
+
+// ── 날짜/통계 ─────────────────────────────────────────────────────────
+function updateDateDisplay(){
+    const lang = localStorage.getItem('appLanguage')||'ko';
+    const locales = {ko:'ko-KR',en:'en-US',ja:'ja-JP',zh:'zh-CN'};
+    document.getElementById('dateDisplay').textContent =
+        new Date().toLocaleDateString(locales[lang]||'ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+}
+function updateHomeStats(){
+    const lang = localStorage.getItem('appLanguage')||'ko';
+    const sc = localStorage.getItem('todoCurrentScore')||'0';
+    const sm = localStorage.getItem('todoMaxScore')||'0';
+    document.getElementById('todoStats').textContent = sc+' / '+sm;
+    const labels = {ko:'점수',en:'Score',ja:'点数',zh:'分数'};
+    document.getElementById('todoScoreDisplay').textContent = (labels[lang]||'점수')+': '+sc+' / '+sm+' P';
+    const bal = parseInt(localStorage.getItem('moneyMonthlyBalance')||'0');
+    const fmt = new Intl.NumberFormat(lang==='en'?'en-US':'ko-KR').format(bal);
+    const syms = {ko:'원',en:'$',ja:'円',zh:'元'};
+    const cur = lang==='en'?syms[lang]+fmt:fmt+syms[lang];
+    document.getElementById('moneyStats').textContent = cur;
+    document.getElementById('moneyDisplay').textContent = cur;
+    const goal = localStorage.getItem('diaryGoalFirstLine');
+    const el = document.getElementById('diaryGoalDisplay');
+    const fb = {ko:'나의 기록',en:'My Record',ja:'私の記録',zh:'我的记录'};
+    el.textContent = (goal&&goal.trim())?goal:(fb[lang]||'나의 기록');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const t = localStorage.getItem('todaytab_theme')||'light';
+    themeIdx = THEMES.indexOf(t); if(themeIdx<0) themeIdx=0;
+    setTheme(t);
+    updateDateDisplay();
+    updateHomeStats();
+    loadQuickLinks();
+    loadQuickLinksState();
+    loadLogoBannerState();
+    updateEditLinkBtn();
+    loadCardVisibility();
+    loadYardState();
+});
+window.addEventListener('languageChanged', ()=>{ updateDateDisplay(); updateHomeStats(); renderQuickLinks(); updateEditLinkBtn(); });
+window.addEventListener('message', e => {
+    if(e.data.type==='statsUpdate'||e.data.type==='goalUpdate') updateHomeStats();
+});
+
+// ── 카드 접기/펼치기 ──────────────────────────────────────────────────
+function toggleCard(name){
+    const n = name[0].toUpperCase()+name.slice(1);
+    const wrap = document.getElementById('wrap'+n);
+    const btn  = document.getElementById('btn'+n);
+    if(!wrap) return;
+    const hidden = wrap.classList.toggle('hidden-card');
+    if(btn) btn.classList.toggle('on', !hidden);
+    localStorage.setItem('card_'+name, hidden?'0':'1');
+}
+function loadCardVisibility(){
+    ['todo','diary','money'].forEach(name => {
+        if(localStorage.getItem('card_'+name)==='0'){
+            const n = name[0].toUpperCase()+name.slice(1);
+            const wrap = document.getElementById('wrap'+n);
+            const btn  = document.getElementById('btn'+n);
+            if(wrap) wrap.classList.add('hidden-card');
+            if(btn)  btn.classList.remove('on');
+        }
+    });
+}
+
+// ── 마당 접기 ─────────────────────────────────────────────────────────
+function toggleYard(){
+    const sec = document.getElementById('yardSection');
+    const icon = document.getElementById('yardIcon');
+    const btn = document.getElementById('yardToggleBtn');
+    const restore = document.getElementById('yardRestore');
+    const collapsed = sec.classList.toggle('collapsed');
+    if(icon) icon.className = collapsed?'fas fa-chevron-down':'fas fa-chevron-up';
+    if(btn) btn.title = collapsed?'펼치기':'접기';
+    if(restore) restore.classList.toggle('show', collapsed);
+    localStorage.setItem('yardCollapsed', collapsed?'1':'0');
+}
+function loadYardState(){
+    if(localStorage.getItem('yardCollapsed')==='1'){
+        document.getElementById('yardSection').classList.add('collapsed');
+        const icon = document.getElementById('yardIcon');
+        const restore = document.getElementById('yardRestore');
+        if(icon) icon.className='fas fa-chevron-down';
+        if(restore) restore.classList.add('show');
+    }
+}
+
+// ── 즐겨찾기 ─────────────────────────────────────────────────────────
+const ICONS = ['fas fa-book','fas fa-university','fas fa-school','fas fa-home','fas fa-shopping-cart','fas fa-coffee','fas fa-music','fas fa-film','fas fa-plane','fas fa-car','fas fa-heart','fas fa-star','fas fa-globe','fas fa-search','fas fa-envelope','fas fa-phone','fas fa-camera','fas fa-gamepad','fas fa-newspaper','fas fa-chart-line','fas fa-briefcase','fas fa-graduation-cap','fas fa-utensils','fas fa-hospital'];
+const COLORS = ['linear-gradient(135deg,#6366F1,#818CF8)','linear-gradient(135deg,#10B981,#34D399)','linear-gradient(135deg,#F59E0B,#FBBF24)','linear-gradient(135deg,#8B5CF6,#A78BFA)','linear-gradient(135deg,#EF4444,#F87171)','linear-gradient(135deg,#EC4899,#F472B6)','linear-gradient(135deg,#14B8A6,#2DD4BF)','linear-gradient(135deg,#F97316,#FB923C)'];
+let links=[], selIcon='fas fa-globe', selColor=COLORS[0], editIdx=-1, linkEditMode=false;
+
+function loadQuickLinks(){
+    const s = localStorage.getItem('todaytab_quickLinks');
+    links = s ? JSON.parse(s) : [{name:'네이버',url:'https://www.naver.com',icon:'fas fa-search',color:COLORS[0]},{name:'유튜브',url:'https://www.youtube.com',icon:'fas fa-film',color:COLORS[2]}];
+    if(!s) saveLinks();
+    renderQuickLinks();
+}
+function saveLinks(){ localStorage.setItem('todaytab_quickLinks', JSON.stringify(links)); }
+function renderQuickLinks(){
+    const g = document.getElementById('quickLinksGrid');
+    let h = '';
+    links.forEach((l,i) => {
+        if(linkEditMode) h += `<div class="quick-link" onclick="openEditLink(${i})"><div class="quick-link-icon" style="background:${l.color}"><i class="${l.icon}"></i></div><div class="quick-link-title">${l.name}</div></div>`;
+        else h += `<a class="quick-link" href="${l.url}" target="_blank"><div class="quick-link-icon" style="background:${l.color}"><i class="${l.icon}"></i></div><div class="quick-link-title">${l.name}</div></a>`;
+    });
+    if(links.length<4) h += `<div class="quick-link add-link-btn" onclick="openAddLink()"><div class="quick-link-icon"><i class="fas fa-plus"></i></div><div class="quick-link-title">추가</div></div>`;
+    g.innerHTML = h;
+}
+function updateEditLinkBtn(){
+    const b = document.getElementById('editLinksBtn'); if(!b) return;
+    b.innerHTML = linkEditMode?`<i class="fas fa-check"></i> 완료`:`<i class="fas fa-cog"></i> 편집`;
+}
+function toggleQuickLinks(){
+    const g = document.getElementById('quickLinksGrid');
+    const t = document.getElementById('quickLinksToggle');
+    const c = g.classList.toggle('collapsed');
+    t.classList.toggle('collapsed', c);
+    localStorage.setItem('quickLinksCollapsed', c?'true':'false');
+}
+function loadQuickLinksState(){
+    if(localStorage.getItem('quickLinksCollapsed')==='true'){
+        document.getElementById('quickLinksGrid').classList.add('collapsed');
+        document.getElementById('quickLinksToggle').classList.add('collapsed');
+    }
+}
+function toggleLinkEditMode(){
+    linkEditMode=!linkEditMode;
+    document.getElementById('editLinksBtn').classList.toggle('active', linkEditMode);
+    updateEditLinkBtn(); renderQuickLinks();
+}
+function openAddLink(){
+    editIdx=-1;
+    document.getElementById('linkModalTitle').innerHTML='<i class="fas fa-plus"></i> 링크 추가';
+    document.getElementById('linkName').value=''; document.getElementById('linkUrl').value='';
+    document.getElementById('deleteLinkBtn').style.display='none';
+    selIcon='fas fa-globe'; selColor=COLORS[0]; renderPickers();
+    document.getElementById('linkModal').classList.add('active');
+}
+function openEditLink(i){
+    editIdx=i; const l=links[i];
+    document.getElementById('linkModalTitle').innerHTML='<i class="fas fa-edit"></i> 링크 수정';
+    document.getElementById('linkName').value=l.name; document.getElementById('linkUrl').value=l.url;
+    document.getElementById('deleteLinkBtn').style.display='block';
+    selIcon=l.icon; selColor=l.color; renderPickers();
+    document.getElementById('linkModal').classList.add('active');
+}
+function closeLinkModal(){ document.getElementById('linkModal').classList.remove('active'); }
+function renderPickers(){
+    document.getElementById('iconPicker').innerHTML = ICONS.map(ic=>`<div class="icon-option${ic===selIcon?' selected':''}" onclick="selIcon='${ic}';renderPickers()"><i class="${ic}"></i></div>`).join('');
+    document.getElementById('colorPicker').innerHTML = COLORS.map((c,i)=>`<div class="color-option${c===selColor?' selected':''}" style="background:${c}" onclick="selColor=COLORS[${i}];renderPickers()"></div>`).join('');
+}
+function saveLink(){
+    const name=document.getElementById('linkName').value.trim();
+    let url=document.getElementById('linkUrl').value.trim();
+    if(!name||!url){alert('이름과 URL을 입력해주세요.'); return;}
+    if(!url.startsWith('http')) url='https://'+url;
+    const d={name,url,icon:selIcon,color:selColor};
+    if(editIdx>=0) links[editIdx]=d; else links.push(d);
+    saveLinks(); renderQuickLinks(); closeLinkModal();
+}
+function deleteLink(){
+    if(editIdx>=0&&confirm('"'+links[editIdx].name+'" 링크를 삭제하시겠습니까?')){
+        links.splice(editIdx,1); saveLinks(); renderQuickLinks(); closeLinkModal();
+    }
+}
+document.getElementById('linkModal').addEventListener('click', e => {
+    if(e.target===document.getElementById('linkModal')) closeLinkModal();
+});
+
+// ── 로고 배너 ─────────────────────────────────────────────────────────
+function showHideButton(){
+    const img=document.querySelector('.logo-banner-img');
+    const c=document.getElementById('logoBannerContainer');
+    if(img.classList.contains('enlarged')) return;
+    img.classList.add('enlarged'); c.classList.add('show-hide-btn');
+}
+function toggleLogoBanner(){
+    const c=document.getElementById('logoBannerContainer');
+    const s=document.getElementById('logoSmallContainer');
+    const hidden=c.style.display==='none';
+    c.style.display=hidden?'block':'none'; s.style.display=hidden?'none':'block';
+    document.querySelector('.logo-banner-img').classList.remove('enlarged');
+    document.getElementById('logoBannerContainer').classList.remove('show-hide-btn');
+    localStorage.setItem('logoBannerHidden', hidden?'false':'true');
+}
+function loadLogoBannerState(){
+    if(localStorage.getItem('logoBannerHidden')==='true'){
+        document.getElementById('logoBannerContainer').style.display='none';
+        document.getElementById('logoSmallContainer').style.display='block';
+    }
+}
+function openBikeMode(){
+    document.getElementById('logoBannerContainer').style.display='none';
+    document.getElementById('logoSmallContainer').style.display='none';
+    document.getElementById('bikeToggleMini').style.display='none';
+    document.getElementById('bikeModeOverlay').classList.add('active');
+    document.getElementById('roseToggleMini').style.display='block';
+}
+function closeBikeMode(){
+    document.getElementById('bikeModeOverlay').classList.remove('active');
+    document.getElementById('bikeToggleMini').style.display='flex';
+    document.getElementById('roseToggleMini').style.display='none';
+    const h=localStorage.getItem('logoBannerHidden');
+    document.getElementById('logoBannerContainer').style.display=h==='true'?'none':'block';
+    document.getElementById('logoSmallContainer').style.display=h==='true'?'block':'none';
+}
+
+// ── 미니 자전거 ───────────────────────────────────────────────────────
+(function(){
+    const cv=document.getElementById('miniBikeCanvas'); if(!cv) return;
+    const C=cv.getContext('2d');
+    const W=200,H=60,gB=H-12; let bx=30,dir=1,wA=0,pA=0;
+    const WR=30,RWx=-60,FWx=60,BBx=-8,BBy=-3,Sx=-28,Sy=-52;
+    const HTtx=46,HTty=-22,HTbx=50,HTby=-2;
+    const HIPx=-22,HIPy=-44,SHOx=-10,SHOy=-80,TORx=-18,TORy=-64;
+    const CRANK=17,TH=26,SH=24,PW=16,PH=4,SC=0.18;
+    function seg(x1,y1,x2,y2,w,col){C.beginPath();C.moveTo(x1,y1);C.lineTo(x2,y2);C.strokeStyle=col;C.lineWidth=w;C.lineCap='round';C.stroke();}
+    function ytube(x1,y1,x2,y2,w){seg(x1,y1,x2,y2,w+3,'#333');seg(x1,y1,x2,y2,w,'#FFD200');}
+    function ik(ox,oy,tx,ty,L1,L2){const dx=tx-ox,dy=ty-oy,d=Math.min(Math.hypot(dx,dy),L1+L2-.5),base=Math.atan2(dy,dx),a=Math.acos(Math.max(-1,Math.min(1,(L1*L1+d*d-L2*L2)/(2*L1*d))));return{mx:ox+L1*Math.cos(base-a),my:oy+L1*Math.sin(base-a)};}
+    function wheel(ax,ay,r){C.beginPath();C.arc(ax,ay,r,0,Math.PI*2);C.strokeStyle='#222';C.lineWidth=5;C.stroke();for(let i=0;i<6;i++){const a=wA+i*Math.PI/3;C.beginPath();C.moveTo(ax+Math.cos(a)*4,ay+Math.sin(a)*4);C.lineTo(ax+Math.cos(a)*(r-6),ay+Math.sin(a)*(r-6));C.strokeStyle='#ccc';C.lineWidth=1;C.stroke();}}
+    function pedal(angle){return{cx:BBx+Math.cos(angle)*CRANK,cy:BBy+Math.sin(angle)*CRANK};}
+    function loop(){
+        bx+=1.05*dir; wA+=0.035; pA+=0.042;
+        if(bx>W-30)dir=-1; if(bx<30)dir=1;
+        C.clearRect(0,0,W,H);
+        C.fillStyle='rgba(0,0,0,0)';C.fillRect(0,0,W,H);
+        C.fillStyle='#a8d860';C.fillRect(0,gB+8,W,H-gB-8);
+        C.strokeStyle='#5aaa28';C.lineWidth=1;C.beginPath();C.moveTo(0,gB+8);C.lineTo(W,gB+8);C.stroke();
+        C.save();C.translate(bx,gB+8-WR*SC);if(dir===-1)C.scale(-1,1);C.scale(SC,SC);
+        wheel(RWx,0,WR);ytube(RWx,0,BBx,BBy,7);ytube(Sx,Sy,RWx,0,6);ytube(BBx,BBy,Sx,Sy,8);
+        for(const[w,col]of[[11,'#333'],[8,'#FFD200']]){C.beginPath();C.moveTo(Sx+2,Sy+4);C.bezierCurveTo(Sx+18,-22,HTtx-22,-24,HTtx,HTty);C.strokeStyle=col;C.lineWidth=w;C.stroke();}
+        ytube(BBx,BBy,HTbx,HTby,8);ytube(HTtx,HTty,HTbx,HTby,11);wheel(FWx,0,WR);
+        const{cx,cy}=pedal(pA+Math.PI);
+        seg(BBx,BBy,cx,cy,3.5,'#777');
+        C.beginPath();C.rect(cx-PW/2,cy-PH/2,PW,PH);C.fillStyle='#999';C.fill();
+        const fK=ik(HIPx,HIPy,cx,cy,TH,SH);seg(HIPx,HIPy,fK.mx,fK.my,11,'#778899');seg(fK.mx,fK.my,cx,cy,10,'#667788');
+        const{cx:cx2,cy:cy2}=pedal(pA);
+        seg(BBx,BBy,cx2,cy2,3.5,'#777');
+        C.beginPath();C.rect(cx2-PW/2,cy2-PH/2,PW,PH);C.fillStyle='#999';C.fill();
+        const nK=ik(HIPx,HIPy,cx2,cy2,TH,SH);seg(HIPx,HIPy,nK.mx,nK.my,15,'#8899aa');seg(nK.mx,nK.my,cx2,cy2,14,'#778899');
+        C.beginPath();C.arc(TORx+8,TORy-42,22,0,Math.PI*2);C.fillStyle='#ffd0b0';C.fill();
+        C.restore();
+        requestAnimationFrame(loop);
+    }
+    loop();
+})();
+</script>
+</body>
+</html>
