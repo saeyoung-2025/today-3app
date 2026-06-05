@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日记 - Today App</title>
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <script src="https://unpkg.com/dexie@3.2.3/dist/dexie.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #FAFAFA;
+            --bg-secondary: #FFFFFF;
+            --bg-card: #FFFFFF;
+            --text-primary: #1A1A1A;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --border-color: #E5E7EB;
+            --accent: #3B82F6;
+            --accent-light: #EFF6FF;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --danger: #EF4444;
+            --danger-light: #FEE2E2;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition: all 0.2s ease;
+        }
+
+        body.theme-gray {
+            --bg-primary: #F3F4F6;
+            --bg-secondary: #E5E7EB;
+            --bg-card: #FFFFFF;
+            --text-primary: #111827;
+            --text-secondary: #4B5563;
+            --text-muted: #9CA3AF;
+            --border-color: #D1D5DB;
+            --accent: #6366F1;
+            --accent-light: #EEF2FF;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Microsoft YaHei', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            padding-bottom: 80px;
+            transition: var(--transition);
+        }
+
+        .container { max-width: 100%; }
+
+        .page-header { text-align: center; margin-bottom: 20px; }
+        .page-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); }
+        .page-header h1 i { color: var(--accent); margin-right: 8px; }
+
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .nav-btn:hover:not(:disabled) { background: var(--accent); color: white; border-color: var(--accent); }
+        .nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .page-indicator { font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title i { color: var(--accent); }
+
+        .page-content { display: none; }
+        .page-content.active { display: block; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.9rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--bg-card);
+        }
+
+        .form-textarea { min-height: 120px; resize: vertical; }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-secondary { background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-secondary); }
+        .btn-secondary:hover { background: var(--border-color); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { opacity: 0.9; }
+        .btn-sm { padding: 6px 12px; font-size: 0.75rem; }
+
+        .mood-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .mood-group .form-select { flex: 1; min-width: 120px; }
+
+        .search-group { display: flex; gap: 8px; margin-bottom: 16px; }
+        .search-group input { flex: 1; }
+
+        .diary-entry {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: var(--transition);
+        }
+
+        .diary-entry:hover { border-color: var(--accent); }
+
+        .diary-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .diary-title { font-size: 1rem; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+        .diary-mood { font-size: 1.25rem; }
+        .diary-date { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; }
+        .diary-content { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; max-height: 60px; overflow: hidden; text-overflow: ellipsis; }
+        .diary-actions { display: flex; gap: 8px; margin-top: 12px; }
+
+        .empty-state { text-align: center; color: var(--text-muted); padding: 40px 20px; }
+        .empty-state i { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.5; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+        .stat-box { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; text-align: center; }
+        .stat-box .label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
+        .stat-box .value { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+
+        .mood-stats { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+        .mood-item { text-align: center; }
+        .mood-item .emoji { font-size: 1.5rem; }
+        .mood-item .count { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+
+        .monthly-list { max-height: 300px; overflow-y: auto; }
+        .monthly-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color); }
+        .monthly-item:last-child { border-bottom: none; }
+        .monthly-item span:last-child { font-weight: 600; color: var(--accent); }
+
+        .action-buttons { display: flex; gap: 12px; margin-top: 16px; }
+        .action-buttons .btn { flex: 1; }
+
+        .danger-card { border-color: var(--danger); background: var(--danger-light); }
+        .danger-card .card-title { color: var(--danger); }
+        .danger-card p { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 12px; }
+
+        .load-more-btn { width: 100%; padding: 12px; margin-top: 12px; }
+
+        .backup-card { border-color: var(--accent); }
+        .backup-card p { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5; }
+        .backup-btn-group { display: flex; flex-direction: column; gap: 8px; }
+        .backup-btn-group .btn { width: 100%; justify-content: center; }
+
+        .voice-btn {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .voice-btn:hover { background: #2563eb; }
+        .voice-btn.recording {
+            background: #EF4444;
+            animation: pulse 1s infinite;
+        }
+        .voice-btn-input {
+            top: 50%;
+            transform: translateY(-50%);
+            bottom: auto;
+            width: 32px;
+            height: 32px;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-book"></i><span>日记</span></h1>
+        </div>
+
+        <div class="nav-bar">
+            <button id="prevPageBtn" class="nav-btn"><i class="fas fa-chevron-left"></i></button>
+            <span class="page-indicator" id="pageIndicator">1 / 3</span>
+            <button id="nextPageBtn" class="nav-btn"><i class="fas fa-chevron-right"></i></button>
+        </div>
+
+        <!-- Page 1: 写日记 & 列表 -->
+        <div id="page1" class="page-content active">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-pen"></i><span>写日记</span></div>
+                <div class="form-group" style="position: relative;">
+                    <input type="text" id="title" class="form-input" placeholder="输入标题" style="padding-right: 45px;">
+                    <button type="button" onclick="toggleVoiceInput('title')" class="voice-btn voice-btn-input" title="语音输入">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                </div>
+                <div class="form-group" style="position: relative;">
+                    <textarea id="content" class="form-textarea" placeholder="记录你的一天..."></textarea>
+                    <button type="button" onclick="toggleVoiceInput('content')" class="voice-btn" title="语音输入">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                </div>
+                <div class="mood-group">
+                    <label style="margin: 0; font-size: 0.85rem;">今天的心情：</label>
+                    <select id="moodSelect" class="form-select">
+                        <option value="Good">😄</option>
+                        <option value="Okay" selected>🙂</option>
+                        <option value="Bad">🙁</option>
+                        <option value="Sad">😭</option>
+                        <option value="Angry">😡</option>
+                    </select>
+                    <button id="saveDiaryBtn" class="btn btn-primary"><i class="fas fa-save"></i> <span>保存</span></button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><i class="fas fa-list"></i><span>最近的日记</span></div>
+                <div class="search-group">
+                    <div style="position: relative; flex: 1;">
+                        <input type="text" id="searchQuery" class="form-input" placeholder="搜索标题/内容/日期" style="padding-right: 45px;">
+                        <button type="button" onclick="toggleVoiceInput('searchQuery')" class="voice-btn voice-btn-input" title="语音输入">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                    </div>
+                    <button id="searchBtn" class="btn btn-secondary btn-sm">搜索</button>
+                    <button id="listBtn" class="btn btn-secondary btn-sm">全部</button>
+                </div>
+                <div id="diaryList">
+                    <div class="empty-state">
+                        <i class="fas fa-book-open"></i>
+                        <p>暂无保存的日记</p>
+                    </div>
+                </div>
+                <button id="loadMoreBtn" class="btn btn-secondary load-more-btn" style="display: none;">显示更多</button>
+            </div>
+        </div>
+
+        <!-- Page 2: 统计 -->
+        <div id="page2" class="page-content">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-chart-bar"></i><span>日记统计</span></div>
+                <div class="stats-grid">
+                    <div class="stat-box"><div class="label">本月</div><div class="value" id="thisMonthCount">0</div></div>
+                    <div class="stat-box"><div class="label">今年</div><div class="value" id="thisYearCount">0</div></div>
+                    <div class="stat-box"><div class="label">总计</div><div class="value" id="totalCount">0</div></div>
+                    <div class="stat-box"><div class="label" id="monthlyAvgLabel">月平均 (2026年)</div><div class="value" id="avgPerMonth">0</div></div>
+                </div>
+                <div class="card-title" style="margin-top: 20px;"><i class="fas fa-face-smile"></i><span>心情统计</span></div>
+                <div class="mood-stats" id="moodStats"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><i class="fas fa-calendar"></i><span>月别日记数</span></div>
+                <div class="monthly-list" id="monthlyStats"></div>
+            </div>
+            
+            <button class="btn btn-secondary" onclick="togglePastYears()" style="width: 100%; margin-bottom: 12px; background: white; border: 1px solid var(--border-color); box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <i class="fas fa-history" id="pastYearsIcon"></i> 
+                <span id="pastYearsText">查看往年</span>
+            </button>
+            <div id="pastYearsSection" style="display: none;"></div>
+        </div>
+
+        <!-- Page 3: 设置 -->
+        <div id="page3" class="page-content">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-bullseye"></i><span>我的决心</span></div>
+                <div id="goalDisplayArea" style="display: none;">
+                    <div id="goalDisplayText" style="background: var(--bg-primary); padding: 16px; border-radius: var(--radius-md); margin-bottom: 16px; line-height: 1.6; white-space: pre-wrap;"></div>
+                    <div class="action-buttons">
+                        <button id="editGoalBtn" class="btn btn-primary"><i class="fas fa-edit"></i> <span>编辑</span></button>
+                        <button id="deleteGoalBtn" class="btn btn-danger"><i class="fas fa-trash"></i> <span>删除</span></button>
+                    </div>
+                </div>
+                <div id="goalEditArea">
+                    <div class="form-group" style="position: relative;">
+                        <textarea id="goalMemoInput" class="form-textarea" placeholder="写下你的日记目标或决心..."></textarea>
+                        <button type="button" onclick="toggleVoiceInput('goalMemoInput')" class="voice-btn" title="语音输入">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                    </div>
+                    <div class="action-buttons">
+                        <button id="saveGoalBtn" class="btn btn-primary"><i class="fas fa-save"></i> <span>保存</span></button>
+                        <button id="cancelGoalBtn" class="btn btn-secondary" style="display: none;"><i class="fas fa-times"></i> <span>取消</span></button>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary" onclick="toggleBackupSection()" style="width: 100%; margin-bottom: 12px; background: white; border: 1px solid var(--border-color); box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <i class="fas fa-chevron-down" id="backupToggleIcon"></i> 
+                <span id="backupToggleText">展开备份/重置</span>
+            </button>
+            
+            <div id="backupSection" style="display: none;">
+                <div class="card backup-card">
+                    <div class="card-title"><i class="fas fa-cloud"></i><span>数据备份/恢复</span></div>
+                    <p style="font-size: 0.85rem; line-height: 1.6;">💾 所有日记都已永久保存。</p>
+                    
+                    <div class="backup-btn-group">
+                        <button class="btn btn-primary" onclick="displayDataAsJson()"><i class="fas fa-desktop"></i> <span>电脑备份</span></button>
+                        <button class="btn btn-primary" onclick="mobileBackup()"><i class="fas fa-mobile-alt"></i> <span>手机备份</span></button>
+                        <input type="file" id="backupFileInput" accept=".json, .txt" style="display: none;" onchange="importDataFromJson(event)">
+                        <button class="btn btn-secondary" onclick="document.getElementById('backupFileInput').click()"><i class="fas fa-upload"></i> <span>从备份恢复</span></button>
+                    </div>
+                </div>
+
+                <div class="card danger-card">
+                    <div class="card-title"><i class="fas fa-exclamation-triangle"></i><span>危险区域</span></div>
+                    <p>点击下面的按钮将删除所有数据。</p>
+                    <button id="globalResetBtn" class="btn btn-danger" style="width: 100%;"><i class="fas fa-trash"></i> <span>重置所有日记</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="lang.js"></script>
+    <script>
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'themeChange') {
+                document.body.classList.remove('theme-gray');
+                if (event.data.theme === 'gray') document.body.classList.add('theme-gray');
+            }
+            if (event.data.type === 'languageChange') {
+                currentLang = event.data.lang;
+                localStorage.setItem('appLanguage', currentLang);
+                applyLanguage();
+                renderDiaryList();
+            }
+        });
+
+        const savedTheme = localStorage.getItem('today_app_theme');
+        if (savedTheme === 'gray') document.body.classList.add('theme-gray');
+
+        const db = new Dexie('StableDiaryDB_InitialDesign');
+        db.version(56).stores({
+            diaries: '++id, title, content, date, mood',
+            goals: 'id'
+        });
+
+        const moodMap = { 'Good': '😄', 'Okay': '🙂', 'Bad': '🙁', 'Sad': '😭', 'Angry': '😡' };
+        const moodMapKo = { '좋음': 'Good', '보통': 'Okay', '나쁨': 'Bad', '슬픔': 'Sad', '화남': 'Angry' };
+        const moodLabels = { 'Good': '好', 'Okay': '一般', 'Bad': '差', 'Sad': '悲伤', 'Angry': '愤怒' };
+
+        const ENTRIES_PER_PAGE = 5;
+        let currentDisplayLimit = ENTRIES_PER_PAGE;
+        let isSearching = false;
+        let currentPage = 1;
+        const totalPages = 3;
+
+        function getLocale() { return 'zh-CN'; }
+
+        function showPage(pageNumber) {
+            currentPage = Math.min(Math.max(pageNumber, 1), totalPages);
+            document.querySelectorAll('.page-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(`page${currentPage}`).classList.add('active');
+            document.getElementById('pageIndicator').textContent = `${currentPage} / ${totalPages}`;
+            document.getElementById('prevPageBtn').disabled = (currentPage === 1);
+            document.getElementById('nextPageBtn').disabled = (currentPage === totalPages);
+            if (currentPage === 2) updateStats();
+            if (currentPage === 3) loadGoal();
+        }
+
+        function formatDate(isoDate) {
+            const date = new Date(isoDate);
+            const options = { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false };
+            return date.toLocaleDateString(getLocale(), options);
+        }
+
+        async function saveDiary() {
+            const title = document.getElementById('title').value.trim();
+            const content = document.getElementById('content').value.trim();
+            const mood = document.getElementById('moodSelect').value;
+            if (title === '' || content === '') { alert('请输入标题和内容！'); return; }
+            try {
+                await db.diaries.add({ title, content, date: new Date().toISOString(), mood });
+                document.getElementById('title').value = '';
+                document.getElementById('content').value = '';
+                document.getElementById('moodSelect').value = 'Okay';
+                isSearching = false;
+                currentDisplayLimit = ENTRIES_PER_PAGE;
+                document.getElementById('searchQuery').value = '';
+                renderDiaryList();
+                alert('日记已保存！📝');
+            } catch (error) { alert('保存时发生错误。'); console.error(error); }
+        }
+
+        async function deleteDiary(id) {
+            if (confirm('删除这篇日记？')) {
+                try { await db.diaries.delete(id); renderDiaryList(); } catch (error) { console.error(error); }
+            }
+        }
+
+        function getMoodEmoji(mood) {
+            if (moodMap[mood]) return moodMap[mood];
+            const englishMood = moodMapKo[mood];
+            if (englishMood && moodMap[englishMood]) return moodMap[englishMood];
+            return '❓';
+        }
+
+        async function renderDiaryList(query = null) {
+            const diaryListElement = document.getElementById('diaryList');
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            let allDiaries;
+            const now = new Date();
+            const thisMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+            
+            try {
+                if (query && query.trim() !== '') {
+                    isSearching = true;
+                    const searchLower = query.trim().toLowerCase();
+                    const filtered = await db.diaries.filter(diary => {
+                        const formattedDate = formatDate(diary.date).toLowerCase();
+                        return diary.date.startsWith(thisMonth) && (
+                            diary.title.toLowerCase().includes(searchLower) || 
+                            diary.content.toLowerCase().includes(searchLower) || 
+                            formattedDate.includes(searchLower)
+                        );
+                    }).toArray();
+                    allDiaries = filtered.reverse();
+                } else {
+                    isSearching = false;
+                    const thisMonthDiaries = await db.diaries.filter(diary => diary.date.startsWith(thisMonth)).toArray();
+                    allDiaries = thisMonthDiaries.reverse();
+                }
+            } catch (e) { console.error(e); allDiaries = []; }
+            
+            diaryListElement.innerHTML = '';
+            if (allDiaries.length === 0) {
+                diaryListElement.innerHTML = '<div class="empty-state"><i class="fas fa-book-open"></i><p>' + (isSearching ? '没有搜索结果' : '本月没有日记') + '</p></div>';
+                loadMoreBtn.style.display = 'none';
+                return;
+            }
+
+            const diariesToDisplay = allDiaries.slice(0, currentDisplayLimit);
+            diariesToDisplay.forEach(diary => {
+                const entryElement = document.createElement('div');
+                entryElement.className = 'diary-entry';
+                const formattedDate = formatDate(diary.date);
+                const moodEmoji = getMoodEmoji(diary.mood);
+                entryElement.innerHTML = '<div class="diary-header"><div class="diary-title">' + diary.title + '<span class="diary-mood">' + moodEmoji + '</span></div></div><div class="diary-date">' + formattedDate + '</div><div class="diary-content">' + diary.content + '</div><div class="diary-actions"><button class="btn btn-secondary btn-sm" onclick="viewDiary(' + diary.id + ')"><i class="fas fa-eye"></i> 查看</button><button class="btn btn-danger btn-sm" onclick="deleteDiary(' + diary.id + ')"><i class="fas fa-trash"></i> 删除</button></div>';
+                diaryListElement.appendChild(entryElement);
+            });
+            
+            if (allDiaries.length > currentDisplayLimit) {
+                loadMoreBtn.textContent = '显示更多 (' + Math.min(allDiaries.length - currentDisplayLimit, ENTRIES_PER_PAGE) + ')';
+                loadMoreBtn.style.display = 'block';
+            } else { 
+                loadMoreBtn.style.display = 'none'; 
+            }
+        }
+
+        async function viewDiary(id) {
+            const diary = await db.diaries.get(id);
+            if (diary) {
+                const moodEmoji = getMoodEmoji(diary.mood);
+                alert(`📝 ${diary.title} ${moodEmoji}\n\n📅 ${formatDate(diary.date)}\n\n${diary.content}`);
+            }
+        }
+
+        async function updateStats() {
+            const allDiaries = await db.diaries.toArray();
+            const now = new Date();
+            const thisYear = now.getFullYear();
+            const thisMonth = `${thisYear}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            const thisMonthDiaries = allDiaries.filter(d => d.date.startsWith(thisMonth));
+            const thisYearDiaries = allDiaries.filter(d => d.date.startsWith(String(thisYear)));
+
+            document.getElementById('thisMonthCount').textContent = thisMonthDiaries.length;
+            document.getElementById('thisYearCount').textContent = thisYearDiaries.length;
+            document.getElementById('totalCount').textContent = allDiaries.length;
+
+            // 当年月平均
+            const currentMonthNum = now.getMonth() + 1;
+            document.getElementById('avgPerMonth').textContent = thisYearDiaries.length > 0 ? Math.round(thisYearDiaries.length / currentMonthNum) : 0;
+            document.getElementById('monthlyAvgLabel').textContent = '月平均 (' + thisYear + '年)';
+
+            const moodCounts = { 'Good': 0, 'Okay': 0, 'Bad': 0, 'Sad': 0, 'Angry': 0 };
+            allDiaries.forEach(d => {
+                if (moodCounts[d.mood] !== undefined) { moodCounts[d.mood]++; }
+                else if (moodMapKo[d.mood]) {
+                    const englishMood = moodMapKo[d.mood];
+                    if (moodCounts[englishMood] !== undefined) moodCounts[englishMood]++;
+                }
+            });
+
+            const moodStatsEl = document.getElementById('moodStats');
+            moodStatsEl.innerHTML = '';
+            Object.entries(moodMap).forEach(([mood, emoji]) => {
+                moodStatsEl.innerHTML += `<div class="mood-item"><div class="emoji">${emoji}</div><div class="count">${moodLabels[mood]}: ${moodCounts[mood]}</div></div>`;
+            });
+
+            const monthlyData = {};
+            const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+            for (let i = 1; i <= 12; i++) {
+                const month = `${thisYear}-${String(i).padStart(2, '0')}`;
+                monthlyData[i] = allDiaries.filter(d => d.date.startsWith(month)).length;
+            }
+            const monthlyStatsEl = document.getElementById('monthlyStats');
+            monthlyStatsEl.innerHTML = '';
+            for (let i = 1; i <= 12; i++) {
+                const count = monthlyData[i];
+                const monthId = 'currentMonth-' + i;
+                monthlyStatsEl.innerHTML += '<div class="monthly-item" style="cursor: pointer; display: block; border-bottom: 1px solid var(--border-color); padding: 12px 0;"><div style="display: flex; justify-content: space-between;" onclick="toggleCurrentMonthDiaries(' + i + ')"><span>' + months[i-1] + '</span><div style="display: flex; align-items: center; gap: 8px;"><span style="font-weight: 600; color: var(--accent);">' + count + '篇</span><i class="fas fa-chevron-down" id="icon-currentMonth-' + i + '"></i></div></div><div id="' + monthId + '" style="display: none; margin-top: 12px;"></div></div>';
+            }
+        }
+
+        async function loadGoal() {
+            try {
+                const goal = await db.goals.get(1);
+                const displayArea = document.getElementById('goalDisplayArea');
+                const editArea = document.getElementById('goalEditArea');
+                const displayText = document.getElementById('goalDisplayText');
+                const cancelBtn = document.getElementById('cancelGoalBtn');
+                
+                if (goal && goal.memo && goal.memo.trim() !== '') {
+                    displayText.textContent = goal.memo;
+                    displayArea.style.display = 'block';
+                    editArea.style.display = 'none';
+                    localStorage.setItem('diaryGoalFirstLine', getFirstLine(goal.memo));
+                } else {
+                    displayArea.style.display = 'none';
+                    editArea.style.display = 'block';
+                    cancelBtn.style.display = 'none';
+                    document.getElementById('goalMemoInput').value = '';
+                    localStorage.removeItem('diaryGoalFirstLine');
+                }
+            } catch (error) { console.error(error); }
+        }
+
+        function getFirstLine(text) {
+            if (!text) return '';
+            const firstLine = text.split('\n')[0].trim();
+            if (firstLine.length > 30) return firstLine.substring(0, 30) + '...';
+            return firstLine;
+        }
+
+        async function saveGoal() {
+            const memo = document.getElementById('goalMemoInput').value.trim();
+            if (!memo) { alert('请输入你的决心。'); return; }
+            try {
+                await db.goals.put({ id: 1, memo: memo });
+                localStorage.setItem('diaryGoalFirstLine', getFirstLine(memo));
+                if (window.parent !== window) window.parent.postMessage({ type: 'goalUpdate' }, '*');
+                alert('决心已保存！💪');
+                loadGoal();
+            } catch (error) { alert('保存错误: ' + error); }
+        }
+
+        function editGoal() {
+            const displayArea = document.getElementById('goalDisplayArea');
+            const editArea = document.getElementById('goalEditArea');
+            const displayText = document.getElementById('goalDisplayText');
+            const cancelBtn = document.getElementById('cancelGoalBtn');
+            document.getElementById('goalMemoInput').value = displayText.textContent;
+            displayArea.style.display = 'none';
+            editArea.style.display = 'block';
+            cancelBtn.style.display = 'inline-flex';
+        }
+
+        function cancelEditGoal() { loadGoal(); }
+
+        async function deleteGoal() {
+            if (confirm('删除你的决心？')) {
+                try {
+                    await db.goals.delete(1);
+                    localStorage.removeItem('diaryGoalFirstLine');
+                    if (window.parent !== window) window.parent.postMessage({ type: 'goalUpdate' }, '*');
+                    alert('决心已删除。');
+                    loadGoal();
+                } catch (error) { alert('删除错误: ' + error); }
+            }
+        }
+
+        async function globalReset() {
+            if (confirm('⚠️ 永久删除所有日记？')) {
+                if (confirm('确定吗？此操作无法撤销。')) {
+                    try {
+                        await db.diaries.clear();
+                        await db.goals.clear();
+                        localStorage.removeItem('diaryGoalFirstLine');
+                        if (window.parent !== window) window.parent.postMessage({ type: 'goalUpdate' }, '*');
+                        alert('所有日记已删除。');
+                        showPage(1);
+                        renderDiaryList();
+                    } catch (error) { alert('重置错误: ' + error); }
+                }
+            }
+        }
+
+        async function displayDataAsJson() {
+            try {
+                const allDiaries = await db.diaries.toArray();
+                const allGoals = await db.goals.toArray();
+                const backupData = { diaries: allDiaries, goals: allGoals, timestamp: new Date().toISOString(), version: '1.0' };
+                if (allDiaries.length === 0 && allGoals.length === 0) { alert('没有数据可备份。'); return; }
+                const jsonString = JSON.stringify(backupData, null, 2);
+                const win = window.open("", "_blank", "width=600,height=600");
+                win.document.write('<h2>备份数据</h2><p style="color: #666;">复制下面的文本并保存到文件中。</p><textarea style="width: 100%; height: 80%; font-size: 12px;">' + jsonString + '</textarea>');
+                win.document.close();
+            } catch (error) { alert('备份错误: ' + error.message); }
+        }
+
+        function importDataFromJson(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (!confirm('恢复将覆盖现有数据。继续？')) { event.target.value = ''; return; }
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const dataToImport = JSON.parse(e.target.result);
+                    if (!dataToImport.diaries || !Array.isArray(dataToImport.diaries)) { alert("无效的备份文件。"); return; }
+                    await db.diaries.bulkPut(dataToImport.diaries);
+                    if (dataToImport.goals && dataToImport.goals.length > 0) {
+                        await db.goals.clear();
+                        await db.goals.put(dataToImport.goals[0]);
+                        localStorage.setItem('diaryGoalFirstLine', getFirstLine(dataToImport.goals[0].memo));
+                    }
+                    if (window.parent !== window) window.parent.postMessage({ type: 'goalUpdate' }, '*');
+                    alert(`恢复完成！已恢复 ${dataToImport.diaries.length} 篇日记。`);
+                    renderDiaryList();
+                    showPage(1);
+                } catch (error) { alert("恢复失败: " + error.message); }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function initializeApp() {
+            document.getElementById('saveDiaryBtn').addEventListener('click', saveDiary);
+            document.getElementById('searchBtn').addEventListener('click', () => {
+                const query = document.getElementById('searchQuery').value;
+                currentDisplayLimit = ENTRIES_PER_PAGE;
+                renderDiaryList(query);
+            });
+            document.getElementById('listBtn').addEventListener('click', () => {
+                document.getElementById('searchQuery').value = '';
+                currentDisplayLimit = ENTRIES_PER_PAGE;
+                isSearching = false;
+                renderDiaryList();
+            });
+            document.getElementById('loadMoreBtn').addEventListener('click', () => {
+                currentDisplayLimit += ENTRIES_PER_PAGE;
+                renderDiaryList(isSearching ? document.getElementById('searchQuery').value : null);
+            });
+            document.getElementById('prevPageBtn').addEventListener('click', () => showPage(currentPage - 1));
+            document.getElementById('nextPageBtn').addEventListener('click', () => showPage(currentPage + 1));
+            document.getElementById('saveGoalBtn').addEventListener('click', saveGoal);
+            document.getElementById('editGoalBtn').addEventListener('click', editGoal);
+            document.getElementById('deleteGoalBtn').addEventListener('click', deleteGoal);
+            document.getElementById('cancelGoalBtn').addEventListener('click', cancelEditGoal);
+            document.getElementById('globalResetBtn').addEventListener('click', globalReset);
+            
+            renderDiaryList();
+            showPage(1);
+            loadGoal();
+        }
+
+        window.onload = initializeApp;
+        window.viewDiary = viewDiary;
+        window.deleteDiary = deleteDiary;
+        window.displayDataAsJson = displayDataAsJson;
+        window.importDataFromJson = importDataFromJson;
+
+        function toggleBackupSection() {
+            const section = document.getElementById('backupSection');
+            const icon = document.getElementById('backupToggleIcon');
+            const text = document.getElementById('backupToggleText');
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+                icon.className = 'fas fa-chevron-up';
+                text.textContent = '收起备份/重置';
+            } else {
+                section.style.display = 'none';
+                icon.className = 'fas fa-chevron-down';
+                text.textContent = '展开备份/重置';
+            }
+        }
+        window.toggleBackupSection = toggleBackupSection;
+
+        function togglePastYears() {
+            const section = document.getElementById('pastYearsSection');
+            const text = document.getElementById('pastYearsText');
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+                text.textContent = '隐藏往年';
+                loadPastYears();
+            } else {
+                section.style.display = 'none';
+                text.textContent = '查看往年';
+            }
+        }
+        window.togglePastYears = togglePastYears;
+
+        async function loadPastYears() {
+            const allDiaries = await db.diaries.toArray();
+            const currentYear = new Date().getFullYear();
+            const yearlyData = {};
+            allDiaries.forEach(diary => {
+                const year = parseInt(diary.date.substring(0, 4));
+                if (year < currentYear) {
+                    if (!yearlyData[year]) yearlyData[year] = [];
+                    yearlyData[year].push(diary);
+                }
+            });
+            const pastYears = Object.keys(yearlyData).map(y => parseInt(y)).sort((a, b) => b - a);
+            const container = document.getElementById('pastYearsSection');
+            if (pastYears.length === 0) {
+                container.innerHTML = '<div class="card"><div class="empty-state"><i class="fas fa-folder-open"></i><p>没有往年日记</p></div></div>';
+                return;
+            }
+            let html = '';
+            pastYears.forEach(year => {
+                const diaries = yearlyData[year];
+                html += '<div class="card" style="margin-bottom: 12px;"><button class="btn btn-secondary" onclick="toggleYearMonths(' + year + ')" style="width: 100%; justify-content: space-between; background: var(--bg-primary);"><span><i class="fas fa-calendar-alt"></i> ' + year + '年 (' + diaries.length + '篇)</span><i class="fas fa-chevron-down" id="yearIcon' + year + '"></i></button><div id="yearMonths' + year + '" style="display: none; margin-top: 12px;"></div></div>';
+            });
+            container.innerHTML = html;
+        }
+
+        function toggleYearDiaries(year) {
+            const section = document.getElementById('yearDiaries' + year);
+            const icon = document.getElementById('yearIcon' + year);
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+                icon.className = 'fas fa-chevron-up';
+            } else {
+                section.style.display = 'none';
+                icon.className = 'fas fa-chevron-down';
+            }
+        }
+        window.toggleYearDiaries = toggleYearDiaries;
+
+        async function toggleCurrentMonthDiaries(month) {
+            const monthId = 'currentMonth-' + month;
+            const content = document.getElementById(monthId);
+            const icon = document.getElementById('icon-currentMonth-' + month);
+            if (!content || !icon) return;
+            if (content.style.display === 'none') {
+                const allDiaries = await db.diaries.toArray();
+                const currentYear = new Date().getFullYear();
+                const monthKey = currentYear + '-' + String(month).padStart(2, '0');
+                const monthDiaries = allDiaries.filter(d => d.date.startsWith(monthKey)).sort((a, b) => new Date(b.date) - new Date(a.date));
+                if (monthDiaries.length === 0) {
+                    content.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 12px;">没有日记</div>';
+                } else {
+                    let html = '';
+                    monthDiaries.forEach(diary => {
+                        const moodEmoji = getMoodEmoji(diary.mood);
+                        const preview = diary.content.substring(0, 50) + (diary.content.length > 50 ? '...' : '');
+                        html += '<div onclick="viewDiary(' + diary.id + ')" style="cursor: pointer; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 8px; background: var(--bg-card);"><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 600; font-size: 0.85rem;">' + (diary.title || '无标题') + '</span><span style="font-size: 1.2rem;">' + moodEmoji + '</span></div><div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">' + formatDate(diary.date) + '</div><div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">' + preview + '</div></div>';
+                    });
+                    content.innerHTML = html;
+                }
+                content.style.display = 'block';
+                icon.className = 'fas fa-chevron-up';
+            } else {
+                content.style.display = 'none';
+                icon.className = 'fas fa-chevron-down';
+            }
+        }
+        window.toggleCurrentMonthDiaries = toggleCurrentMonthDiaries;
+
+        async function toggleYearMonths(year) {
+            const content = document.getElementById('yearMonths' + year);
+            const icon = document.getElementById('yearIcon' + year);
+            if (!content || !icon) return;
+            if (content.style.display === 'none') {
+                const allDiaries = await db.diaries.toArray();
+                const yearDiaries = allDiaries.filter(d => d.date.startsWith(year.toString()));
+                const monthlyData = {};
+                const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+                for (let i = 1; i <= 12; i++) {
+                    const monthKey = year + '-' + String(i).padStart(2, '0');
+                    monthlyData[i] = yearDiaries.filter(d => d.date.startsWith(monthKey));
+                }
+                let html = '<div style="padding: 12px;">';
+                for (let i = 1; i <= 12; i++) {
+                    const count = monthlyData[i].length;
+                    if (count > 0) {
+                        const pastMonthId = 'pastMonth-' + year + '-' + i;
+                        html += '<div style="margin-bottom: 8px; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;"><div onclick="togglePastMonthDiaries(' + year + ', ' + i + ')" style="cursor: pointer; padding: 12px; background: var(--bg-primary); display: flex; justify-content: space-between; align-items: center;"><span>' + months[i-1] + '</span><div style="display: flex; align-items: center; gap: 8px;"><span style="font-weight: 600; color: var(--accent);">' + count + '篇</span><i class="fas fa-chevron-down" id="icon-' + pastMonthId + '"></i></div></div><div id="' + pastMonthId + '" style="display: none; padding: 12px;"></div></div>';
+                    }
+                }
+                html += '</div>';
+                content.innerHTML = html;
+                content.style.display = 'block';
+                icon.className = 'fas fa-chevron-up';
+            } else {
+                content.style.display = 'none';
+                icon.className = 'fas fa-chevron-down';
+            }
+        }
+        window.toggleYearMonths = toggleYearMonths;
+
+        async function togglePastMonthDiaries(year, month) {
+            const pastMonthId = 'pastMonth-' + year + '-' + month;
+            const content = document.getElementById(pastMonthId);
+            const icon = document.getElementById('icon-' + pastMonthId);
+            if (!content || !icon) return;
+            if (content.style.display === 'none') {
+                const allDiaries = await db.diaries.toArray();
+                const monthKey = year + '-' + String(month).padStart(2, '0');
+                const monthDiaries = allDiaries.filter(d => d.date.startsWith(monthKey)).sort((a, b) => new Date(b.date) - new Date(a.date));
+                let html = '';
+                monthDiaries.forEach(diary => {
+                    const moodEmoji = getMoodEmoji(diary.mood);
+                    const preview = diary.content.substring(0, 50) + (diary.content.length > 50 ? '...' : '');
+                    html += '<div onclick="viewDiary(' + diary.id + ')" style="cursor: pointer; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 8px; background: var(--bg-card);"><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 600; font-size: 0.85rem;">' + (diary.title || '无标题') + '</span><span style="font-size: 1.2rem;">' + moodEmoji + '</span></div><div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">' + formatDate(diary.date) + '</div><div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">' + preview + '</div></div>';
+                });
+                content.innerHTML = html;
+                content.style.display = 'block';
+                icon.className = 'fas fa-chevron-up';
+            } else {
+                content.style.display = 'none';
+                icon.className = 'fas fa-chevron-down';
+            }
+        }
+        window.togglePastMonthDiaries = togglePastMonthDiaries;
+
+        async function mobileBackup() {
+            const diaries = await db.diaries.toArray();
+            const goals = await db.goals.toArray();
+            if (diaries.length === 0 && goals.length === 0) { alert('没有数据可备份。'); return; }
+            const data = JSON.stringify({ diaries, goals }, null, 2);
+            const today = new Date().toISOString().slice(0, 10);
+            const fileName = `diary_backup_${today}.json`;
+            if (navigator.share && navigator.canShare) {
+                const file = new File([data], fileName, { type: 'application/json' });
+                if (navigator.canShare({ files: [file] })) {
+                    try { await navigator.share({ files: [file], title: '日记备份', text: '日记备份文件。' }); return; }
+                    catch (err) { if (err.name === 'AbortError') return; }
+                }
+                try { await navigator.share({ title: '日记备份', text: data }); return; }
+                catch (err) { if (err.name === 'AbortError') return; }
+            }
+            try { await navigator.clipboard.writeText(data); alert('备份数据已复制到剪贴板！\n\n请粘贴到备忘录或发送给自己。'); }
+            catch (err) { displayDataAsJson(); }
+        }
+        window.mobileBackup = mobileBackup;
+
+        let recognition = null;
+        let isRecording = false;
+        let currentVoiceTarget = null;
+        let currentVoiceBtn = null;
+
+        function toggleVoiceInput(targetId) {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('此浏览器不支持语音识别。\n请使用Chrome或Edge。');
+                return;
+            }
+            if (isRecording) { stopVoiceInput(); } else { startVoiceInput(targetId, event.target.closest('.voice-btn')); }
+        }
+
+        function startVoiceInput(targetId, btn) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'zh-CN';
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            currentVoiceTarget = document.getElementById(targetId);
+            currentVoiceBtn = btn;
+            recognition.onstart = () => {
+                isRecording = true;
+                if (currentVoiceBtn) { currentVoiceBtn.classList.add('recording'); currentVoiceBtn.innerHTML = '<i class="fas fa-stop"></i>'; }
+            };
+            recognition.onresult = (event) => {
+                let finalTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
+                }
+                if (finalTranscript && currentVoiceTarget) currentVoiceTarget.value += finalTranscript + ' ';
+            };
+            recognition.onerror = (event) => {
+                console.log('语音识别错误:', event.error);
+                stopVoiceInput();
+                if (event.error === 'not-allowed') alert('需要麦克风权限。\n请在浏览器设置中允许麦克风。');
+            };
+            recognition.onend = () => { if (isRecording) recognition.start(); };
+            recognition.start();
+        }
+
+        function stopVoiceInput() {
+            if (recognition) {
+                isRecording = false;
+                recognition.stop();
+                if (currentVoiceBtn) { currentVoiceBtn.classList.remove('recording'); currentVoiceBtn.innerHTML = '<i class="fas fa-microphone"></i>'; }
+                currentVoiceTarget = null;
+                currentVoiceBtn = null;
+            }
+        }
+        window.toggleVoiceInput = toggleVoiceInput;
+    </script>
+</body>
+</html>

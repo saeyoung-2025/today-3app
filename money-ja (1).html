@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>家計簿 - Today App</title>
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <script src="lang.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #FAFAFA;
+            --bg-secondary: #FFFFFF;
+            --bg-card: #FFFFFF;
+            --text-primary: #1A1A1A;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --border-color: #E5E7EB;
+            --accent: #3B82F6;
+            --accent-light: #EFF6FF;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --danger: #EF4444;
+            --danger-light: #FEE2E2;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --purple: #8B5CF6;
+            --purple-light: #EDE9FE;
+            --orange: #F97316;
+            --orange-light: #FFEDD5;
+            --cream: #FFF8E7;
+            --cream-border: #F5DEB3;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition: all 0.2s ease;
+        }
+        body.theme-gray {
+            --bg-primary: #F3F4F6;
+            --bg-secondary: #E5E7EB;
+            --bg-card: #FFFFFF;
+            --text-primary: #111827;
+            --text-secondary: #4B5563;
+            --text-muted: #9CA3AF;
+            --border-color: #D1D5DB;
+            --accent: #6366F1;
+            --accent-light: #EEF2FF;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            padding-bottom: 80px;
+            transition: var(--transition);
+        }
+        .container { max-width: 100%; }
+        .page-header { text-align: center; margin-bottom: 16px; }
+        .page-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); }
+        .page-header h1 i { color: var(--accent); margin-right: 8px; }
+        .balance-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .balance-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; }
+        .balance-value { font-size: 2rem; font-weight: 700; color: var(--text-primary); }
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+        }
+        .nav-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .nav-btn:hover:not(:disabled) { background: var(--accent); color: white; border-color: var(--accent); }
+        .nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .page-indicator { font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); }
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-title i { color: var(--accent); }
+        .page-content { display: none; }
+        .page-content.active { display: block; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.9rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+        .form-input:focus, .form-textarea:focus, .form-select:focus { outline: none; border-color: var(--accent); background: var(--bg-card); }
+        .form-textarea { min-height: 80px; resize: vertical; }
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-secondary { background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-secondary); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-sm { padding: 8px 12px; font-size: 0.75rem; }
+        .action-buttons { display: flex; gap: 12px; margin-top: 16px; }
+        .action-buttons .btn { flex: 1; }
+        .stats-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+        .stat-item { text-align: center; padding: 12px; background: var(--bg-primary); border-radius: var(--radius-md); }
+        .stat-item .label { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 4px; }
+        .stat-item .value { font-size: 0.9rem; font-weight: 600; }
+        .stat-item .value.income { color: var(--success); }
+        .stat-item .value.expense { color: var(--danger); }
+        .stat-item .value.balance { color: var(--accent); }
+        .chart-container { margin-top: 16px; }
+        .ledger-month { margin-bottom: 20px; border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; }
+        .ledger-month-header { background: var(--accent); color: white; padding: 12px 16px; font-weight: 600; text-align: center; }
+        .ledger-month-stats { display: flex; justify-content: space-around; padding: 12px; background: var(--bg-primary); border-bottom: 1px solid var(--border-color); font-size: 0.8rem; }
+        .income-text { color: var(--success); }
+        .expense-text { color: var(--danger); }
+        .ledger-table { width: 100%; border-collapse: collapse; }
+        .ledger-table th, .ledger-table td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; }
+        .ledger-table th { background: var(--bg-primary); font-weight: 600; color: var(--text-secondary); }
+        .ledger-table .saving-text { color: var(--purple); }
+        .ledger-table .fixed-text { color: var(--warning); }
+        .empty-state { text-align: center; color: var(--text-muted); padding: 40px 20px; }
+        .empty-state i { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.5; display: block; }
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .year-stat-box { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; }
+        .year-stat-box .year { font-size: 1rem; font-weight: 700; margin-bottom: 12px; color: var(--text-primary); }
+        .year-stat-box .stat-row { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--bg-card); border-radius: var(--radius-lg); padding: 24px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; position: relative; }
+        .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 1.25rem; color: var(--text-muted); cursor: pointer; }
+        .modal-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 20px; color: var(--text-primary); }
+        .backup-card { border-color: var(--accent); }
+        .backup-card p { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5; }
+        .danger-card { border-color: var(--danger); background: var(--danger-light); }
+        .danger-card .card-title { color: var(--danger); }
+        .danger-card p { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 12px; }
+        .fixed-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: var(--bg-card); border-bottom: 1px solid var(--border-color); }
+        .fixed-item:last-child { border-bottom: none; }
+        .fixed-item .item-info { flex: 1; }
+        .fixed-item .item-name { font-weight: 500; font-size: 0.85rem; color: var(--text-primary); }
+        .fixed-item .item-note { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+        .fixed-item .item-amount { font-weight: 600; font-size: 0.85rem; margin-right: 8px; }
+        .fixed-item .item-amount.income { color: var(--success); }
+        .fixed-item .item-amount.saving { color: var(--purple); }
+        .fixed-item .item-amount.fixed { color: var(--warning); }
+        .fixed-item .item-amount.food { color: var(--orange); }
+        .fixed-item .item-actions { display: flex; gap: 4px; }
+        .fixed-item .item-actions button { padding: 4px 8px; font-size: 0.65rem; }
+        .section-box { border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 16px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; color: white; position: relative; }
+        .section-header.income-header { background: var(--success); }
+        .section-header.saving-header { background: var(--purple); }
+        .section-header.fixed-header { background: var(--warning); }
+        .section-header.food-header { background: var(--orange); }
+        .section-header h3 { font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .section-header .info-btn { background: rgba(255,255,255,0.3); border: none; color: white; width: 22px; height: 22px; border-radius: 50%; font-size: 0.7rem; cursor: pointer; margin-left: 8px; }
+        .section-header .section-total { font-size: 0.9rem; font-weight: 700; }
+        .section-items { background: var(--bg-primary); }
+        .empty-section { padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.8rem; }
+        .summary-box { background: var(--cream); border: 2px solid var(--cream-border); border-radius: var(--radius-lg); padding: 20px; margin-top: 24px; }
+        .summary-box .summary-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; text-align: center; padding-bottom: 12px; border-bottom: 2px solid var(--cream-border); }
+        .summary-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 0.85rem; }
+        .summary-row.with-border { border-bottom: 1px solid var(--cream-border); padding-bottom: 12px; margin-bottom: 8px; }
+        .summary-row .label { color: var(--text-secondary); }
+        .summary-row .value { font-weight: 600; }
+        .summary-row .value.positive { color: var(--success); }
+        .summary-row .value.negative { color: var(--danger); }
+        .summary-row.highlight { background: rgba(255, 255, 255, 0.7); margin: 12px -20px -20px -20px; padding: 16px 20px; border-radius: 0 0 var(--radius-lg) var(--radius-lg); font-weight: 700; font-size: 1rem; }
+        .add-item-form { background: var(--bg-primary); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px; }
+        .add-item-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .type-summary-table { border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; }
+        .type-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
+        .type-row:last-child { border-bottom: none; }
+        .type-label { font-size: 0.85rem; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; }
+        .type-label i { width: 16px; }
+        .type-value { font-size: 0.9rem; font-weight: 600; }
+        .income-row { background: var(--success-light); }
+        .income-row .type-label i { color: var(--success); }
+        .income-row .type-value { color: var(--success); }
+        .expense-row .type-label i { color: var(--danger); }
+        .expense-row .type-value { color: var(--danger); }
+        .saving-row { background: var(--purple-light); }
+        .saving-row .type-label i { color: var(--purple); }
+        .saving-row .type-value { color: var(--purple); }
+        .fixed-row { background: var(--warning-light); }
+        .fixed-row .type-label i { color: var(--warning); }
+        .fixed-row .type-value { color: var(--warning); }
+        .total-row { background: var(--accent-light); }
+        .total-row .type-label { font-weight: 600; color: var(--text-primary); }
+        .total-row .type-label i { color: var(--accent); }
+        .total-row .type-value { color: var(--accent); font-size: 1rem; }
+        .info-popup { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .info-popup.active { display: flex; }
+        .info-popup-content { background: white; border-radius: var(--radius-lg); padding: 20px; width: 85%; max-width: 350px; }
+        .info-popup-content h4 { font-size: 1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .info-popup-content p { font-size: 0.85rem; line-height: 1.6; color: var(--text-secondary); white-space: pre-wrap; }
+        .info-popup-content button { margin-top: 16px; width: 100%; }
+        .asset-section { margin-bottom: 20px; }
+        .asset-section-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-radius: var(--radius-md); margin-bottom: 8px; }
+        .asset-section-header span { font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .saving-header { background: var(--purple-light); color: var(--purple); }
+        .saving-header span i { color: var(--purple); }
+        .fixed-header { background: var(--warning-light); color: #92400E; }
+        .fixed-header span i { color: var(--warning); }
+        .other-header { background: var(--accent-light); color: var(--accent); }
+        .other-header span i { color: var(--accent); }
+        .asset-section-desc { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px; padding-left: 4px; }
+        .asset-table { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; min-height: 60px; }
+        .asset-table-empty { grid-column: 1 / -1; text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.8rem; background: var(--bg-primary); border-radius: var(--radius-md); border: 1px dashed var(--border-color); }
+        .asset-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; transition: var(--transition); }
+        .asset-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); }
+        .asset-card-image { width: 100%; height: 100px; object-fit: cover; cursor: pointer; background: var(--bg-primary); }
+        .asset-card-info { padding: 10px; }
+        .asset-card-name { font-size: 0.8rem; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .asset-card-delete { width: 100%; padding: 6px; background: var(--danger-light); border: none; color: var(--danger); font-size: 0.75rem; cursor: pointer; border-radius: var(--radius-sm); transition: var(--transition); }
+        .asset-card-delete:hover { background: var(--danger); color: white; }
+        .image-preview-modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
+        .image-preview-modal.active { display: flex; }
+        .image-preview-modal img { max-width: 95%; max-height: 90%; object-fit: contain; }
+        .image-preview-close { position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.2); color: white; border: none; cursor: pointer; font-size: 1.2rem; }
+        .voice-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; border-radius: 50%; border: none; background: var(--accent); color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-size: 0.85rem; }
+        .voice-btn:hover { background: #2563eb; }
+        .voice-btn.recording { background: #EF4444; animation: pulse 1s infinite; }
+        .voice-btn-textarea { top: auto; bottom: 10px; transform: none; }
+        @keyframes pulse { 0%, 100% { transform: translateY(-50%) scale(1); } 50% { transform: translateY(-50%) scale(1.1); } }
+
+.saving-header {
+    background: var(--purple-light);
+    color: var(--purple);
+    position: relative;
+}
+
+.saving-header h3 {
+    position: relative;
+    z-index: 10;
+    color: white !important;
+}
+.saving-header * {
+    position: relative;
+    z-index: 10;
+    color: white !important;
+}
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="page-header"><h1><i class="fas fa-wallet"></i> 家計簿</h1></div>
+        <div class="balance-card">
+         <div class="balance-label" id="balanceLabel">残高</div>
+            <div class="balance-value" id="currentBalance">¥0</div>
+        </div>
+        <div class="nav-bar">
+            <button id="prevPageBtn" class="nav-btn"><i class="fas fa-chevron-left"></i></button>
+            <span class="page-indicator" id="pageIndicator">1 / 5</span>
+            <button id="nextPageBtn" class="nav-btn"><i class="fas fa-chevron-right"></i></button>
+        </div>
+
+        <!-- Page 1: Record -->
+        <div id="page1" class="page-content active">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-plus-circle"></i> 新規取引</div>
+                <div class="form-group"><label>日付</label><input type="date" id="budgetDate" class="form-input"></div>
+                <div class="form-group"><label>種類</label>
+                    <select id="budgetType" class="form-select">
+                        <option value="income">収入</option>
+                        <option value="expense">一般支出（食費等）</option>
+                        <option value="saving">貯蓄</option>
+                        <option value="fixed">固定費</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>金額</label><div style="position: relative;"><input type="number" id="budgetAmount" class="form-input" placeholder="金額を入力" min="1" style="padding-right: 45px;"><button type="button" onclick="toggleVoiceInput('budgetAmount')" class="voice-btn" title="Voice input"><i class="fas fa-microphone"></i></button></div></div>
+                <div class="form-group"><label>カテゴリ</label><select id="budgetCategory" class="form-select"></select></div>
+                <div class="form-group"><label>メモ（任意）</label><div style="position: relative;"><textarea id="budgetMemo" class="form-textarea" placeholder="簡単なメモ"></textarea><button type="button" onclick="toggleVoiceInput('budgetMemo')" class="voice-btn voice-btn-textarea" title="Voice input"><i class="fas fa-microphone"></i></button></div></div>
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" id="clearInputBtn"><i class="fas fa-eraser"></i> Clear</button>
+                    <button class="btn btn-success" id="saveBudgetBtn"><i class="fas fa-save"></i> Save</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title"><i class="fas fa-chart-pie"></i> 月間サマリー</div>
+                <div class="stats-summary">
+                    <div class="stat-item"><div class="label">収入</div><div class="value income" id="monthlyIncome">¥0</div></div>
+                    <div class="stat-item"><div class="label">支出</div><div class="value expense" id="monthlyExpense">¥0</div></div>
+                    <div class="stat-item"><div class="label">残高</div><div class="value balance" id="monthlyBalance">¥0</div></div>
+                </div>
+                <div class="chart-container"><canvas id="dailyExpenseChart"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-title"><i class="fas fa-list-ul"></i> 月間サマリー by Type</div>
+                <div class="type-summary-table">
+                    <div class="type-row income-row">
+                        <span class="type-label"><i class="fas fa-arrow-down"></i> 収入</span>
+                        <span class="type-value" id="typeIncome">+¥0</span>
+                    </div>
+                    <div class="type-row expense-row">
+                        <span class="type-label"><i class="fas fa-utensils"></i> 一般支出</span>
+                        <span class="type-value" id="typeExpense">-¥0</span>
+                    </div>
+                    <div class="type-row saving-row">
+                        <span class="type-label"><i class="fas fa-piggy-bank"></i> Savings</span>
+                        <span class="type-value" id="typeSaving">-¥0</span>
+                    </div>
+                    <div class="type-row fixed-row">
+                        <span class="type-label"><i class="fas fa-file-invoice-dollar"></i> 固定費</span>
+                        <span class="type-value" id="typeFixed">-¥0</span>
+                    </div>
+                    <div class="type-row total-row">
+                        <span class="type-label"><i class="fas fa-coins"></i> Balance</span>
+                        <span class="type-value" id="typeTotal">¥0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 2: Ledger -->
+        <div id="page2" class="page-content">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-book"></i> 月間帳簿</div>
+                <div id="monthlyLedgersContent"><div class="empty-state"><i class="fas fa-receipt"></i><p>記録がありません</p></div></div>
+            </div>
+        </div>
+
+        <!-- Page 3: Stats + Backup -->
+        <div id="page3" class="page-content">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-bullseye"></i> 目標</div>
+                <div id="goalDisplayArea" style="display: none;">
+                    <div id="goalDisplayText" style="background: var(--bg-primary); padding: 16px; border-radius: var(--radius-md); margin-bottom: 16px; line-height: 1.6; white-space: pre-wrap;"></div>
+                    <div class="action-buttons">
+                        <button id="editGoalBtn" class="btn btn-primary"><i class="fas fa-edit"></i> Edit</button>
+                        <button id="deleteGoalBtn" class="btn btn-danger"><i class="fas fa-trash"></i> Delete</button>
+                    </div>
+                </div>
+                <div id="goalEditArea">
+                    <div class="form-group" style="position: relative;"><textarea id="goalMemoInput" class="form-textarea" placeholder="長期的な財務目標を設定..."></textarea><button type="button" onclick="toggleVoiceInput('goalMemoInput')" class="voice-btn voice-btn-textarea" title="Voice input"><i class="fas fa-microphone"></i></button></div>
+                    <div class="action-buttons">
+                        <button id="saveGoalBtn" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
+                        <button id="cancelGoalBtn" class="btn btn-secondary" style="display: none;"><i class="fas fa-times"></i> Cancel</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title"><i class="fas fa-chart-line"></i> 5年間種類別統計</div>
+                <div id="fiveYearStatsContent">
+                    <div class="empty-state"><i class="fas fa-chart-bar"></i><p>統計データがありません</p></div>
+                </div>
+            </div>
+            <button class="btn btn-secondary" onclick="togglePastYears()" style="width: 100%; margin-bottom: 12px; background: white; border: 1px solid var(--border-color); box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <i class="fas fa-history" id="pastYearsIcon"></i> 
+                <span id="pastYearsText">過去の年を表示</span>
+            </button>
+            <div id="pastYearsSection" style="display: none;">
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-archive"></i> 過去の年の記録</div>
+                    <div id="pastYearsContent">
+<div class="empty-state"><i class="fas fa-folder-open"></i><p>過去の年のデータがありません</p></div></div>
+                </div>
+            </div>
+            <button class="btn btn-secondary" onclick="toggleBackupSection()" style="width: 100%; margin-bottom: 12px; background: white; border: 1px solid var(--border-color); box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <i class="fas fa-chevron-down" id="backupToggleIcon"></i> 
+                <span id="backupToggleText">バックアップ/リセットを展開</span>
+            </button>
+            <div id="backupSection" style="display: none;">
+                <div class="card backup-card">
+                    <div class="card-title"><i class="fas fa-cloud"></i> データバックアップ/復元</div>
+                    <p style="font-size: 0.85rem; line-height: 1.6;">💾 すべてのデータは永久に保存されます.</p>
+                    <div style="background: var(--bg-primary); padding: 12px; border-radius: 8px; margin: 12px 0; font-size: 0.8rem; line-height: 1.6;">
+                        <p>💻 <strong>PC</strong>: Click PCバックアップ</p>
+                        <p style="margin-top: 6px;">📱 <strong>Mobile</strong>: Click 'モバイルバックアップ' → Share via email or messages</p>
+                        <p style="margin-top: 6px;">🔄 <strong>Restore</strong>: Select saved file (.json or .txt) to restore</p>
+                    </div>
+                    <div class="backup-btn-group">
+                        <button class="btn btn-primary" onclick="displayDataAsJson()"><i class="fas fa-desktop"></i> PCバックアップ</button>
+                        <button class="btn btn-primary" onclick="mobileBackup()"><i class="fas fa-mobile-alt"></i> モバイルバックアップ</button>
+                        <input type="file" id="backupFileInput" accept=".json, .txt" style="display: none;" onchange="importDataFromJson(event)">
+                        <button class="btn btn-secondary" onclick="document.getElementById('backupFileInput').click()"><i class="fas fa-upload"></i> バックアップから復元</button>
+                    </div>
+                </div>
+                <div class="card danger-card">
+                    <div class="card-title"><i class="fas fa-exclamation-triangle"></i> 危険ゾーン</div>
+                    <p>下のボタンを押すと、すべての家計簿データが永久に削除されます.</p>
+                    <button id="globalResetBtn" class="btn btn-danger" style="width: 100%;"><i class="fas fa-trash"></i> すべてのデータをリセット</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 4: 固定収入/支出 -->
+        <div id="page4" class="page-content">
+            <div class="card">
+                <div class="card-title" style="justify-content: space-between;">
+                    <span><i class="fas fa-clipboard-list"></i> 固定収入/支出管理</span>
+                    <button class="btn btn-sm btn-secondary" onclick="showPageNotice()" style="padding: 6px 10px;"><i class="fas fa-bell"></i> Info</button>
+                </div>
+                <div class="add-item-form">
+                    <div class="form-group"><label>カテゴリ</label>
+                        <select id="fixedType" class="form-select">
+                            <option value="income">固定収入</option>
+                            <option value="food">月平均食費</option>
+<option value="saving">貯蓄性支出（預金/年金/ローン元金返済）</option>
+<option value="fixed">義務支出（非貯蓄性/保障性保険/ローン利子）</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>項目名</label><div style="position: relative;"><input type="text" id="fixedName" class="form-input" placeholder="例：給料、貯蓄" style="padding-right: 45px;"><button type="button" onclick="toggleVoiceInput('fixedName')" class="voice-btn" title="Voice input"><i class="fas fa-microphone"></i></button></div></div>
+                        <div class="form-group"><label>金額</label><div style="position: relative;"><input type="number" id="fixedAmount" class="form-input" placeholder="Amount" min="1" style="padding-right: 45px;"><button type="button" onclick="toggleVoiceInput('fixedAmount')" class="voice-btn" title="Voice input"><i class="fas fa-microphone"></i></button></div></div>
+                    </div>
+                    <div class="form-group"><label>備考（任意）</label><div style="position: relative;"><input type="text" id="fixedNote" class="form-input" placeholder="簡単なメモ" style="padding-right: 45px;"><button type="button" onclick="toggleVoiceInput('fixedNote')" class="voice-btn" title="Voice input"><i class="fas fa-microphone"></i></button></div></div>
+                    <button class="btn btn-success" id="addFixedBtn" style="width: 100%;"><i class="fas fa-plus"></i> 項目を追加</button>
+                </div>
+                <div id="fixedItemsList"></div>
+                <div class="summary-box" id="fixedSummary" style="display: none;"></div>
+                <div class="summary-box" id="yearlyEstimate" style="display: none; margin-top: 16px;"></div>
+            </div>
+        </div>
+
+<!-- Page 5: Asset Summary -->
+        <div id="page5" class="page-content">
+            <div class="card">
+                <div class="card-title">
+                    <span style="font-size: 1.3rem;">🏡📊</span> 我が家の資産・負債の現況
+                </div>
+                
+                <!-- Asset List -->
+                <div class="section-box" style="margin-bottom: 16px;">
+                    <div class="section-header" style="background: var(--success-light); display: flex; justify-content: space-between; align-items: center; padding: 12px 16px;">
+                        <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--success); margin: 0;">
+                            💰 資産リスト（不動産/預金等）
+                        </h3>
+                        <button class="btn btn-sm" style="background: var(--success); color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem;" onclick="addAssetSummaryItem('asset')">
+                            <i class="fas fa-plus"></i> 追加
+                        </button>
+                    </div>
+                    <div class="section-items" id="assetSummaryList" style="background: var(--bg-primary);"></div>
+                </div>
+                
+                <!-- Debt List -->
+                <div class="section-box">
+                    <div class="section-header" style="background: var(--warning-light); display: flex; justify-content: space-between; align-items: center; padding: 12px 16px;">
+                        <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--warning); margin: 0;">
+                            💳 負債リスト（担保ローン/カードローン等）
+                        </h3>
+                        <button class="btn btn-sm" style="background: var(--warning); color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem;" onclick="addAssetSummaryItem('debt')">
+                            <i class="fas fa-plus"></i> 追加
+                        </button>
+                    </div>
+                    <div class="section-items" id="debtSummaryList" style="background: var(--bg-primary);"></div>
+                </div>
+                
+                <!-- Background Image Selection -->
+                <div style="margin-top: 16px; text-align: center;">
+                    <button class="btn btn-sm btn-secondary" onclick="selectSummaryBgImage()">
+                        <i class="fas fa-image"></i> 背景画像を選択
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="removeSummaryBgImage()" style="margin-left: 8px;">
+                        <i class="fas fa-times"></i> 画像を削除
+                    </button>
+                    <input type="file" id="summaryBgInput" accept="image/*" style="display: none;" onchange="handleSummaryBgUpload(event)">
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 6: Asset Image Gallery -->
+        <div id="page6" class="page-content">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-images"></i> 資産概要</div>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.6;">
+                    💼 保険証券、銀行明細、投資などの重要な資産書類をカテゴリ別に管理
+                </p>
+                <div class="asset-section">
+                    <div class="asset-section-header saving-header">
+                        <span><i class="fas fa-piggy-bank"></i> Savings</span>
+                        <button class="btn btn-sm btn-primary" onclick="openAssetModal('saving')"><i class="fas fa-plus"></i> Add</button>
+                    </div>
+                    <p class="asset-section-desc">預金、普通預金、貯蓄保険、年金、投資など</p>
+                    <div id="savingAssets" class="asset-table"></div>
+                </div>
+                <div class="asset-section">
+                    <div class="asset-section-header fixed-header">
+                        <span><i class="fas fa-shield-halved"></i> 固定費（必須）</span>
+                        <button class="btn btn-sm btn-primary" onclick="openAssetModal('fixed')"><i class="fas fa-plus"></i> Add</button>
+                    </div>
+                    <p class="asset-section-desc">医療保険、自動車保険、住宅保険など</p>
+                    <div id="fixedAssets" class="asset-table"></div>
+                </div>
+                <div class="asset-section">
+                    <div class="asset-section-header other-header">
+                        <span><i class="fas fa-folder-open"></i> その他の書類</span>
+                        <button class="btn btn-sm btn-primary" onclick="openAssetModal('other')"><i class="fas fa-plus"></i> Add</button>
+                    </div>
+                    <p class="asset-section-desc">領収書、契約書、メモ、その他のスクリーンショット</p>
+                    <div id="otherAssets" class="asset-table"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Asset Upload Modal -->
+    <div id="assetModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeAssetModal()">&times;</button>
+            <div class="modal-title" id="assetModalTitle">資産画像を追加</div>
+            <div class="form-group">
+                <label>項目名</label>
+                <input type="text" id="assetName" class="form-input" placeholder="例：健康保険、年金">
+            </div>
+            <div class="form-group">
+                <label>画像を選択</label>
+                <input type="file" id="assetImageInput" accept="image/*" class="form-input" style="padding: 10px;">
+            </div>
+            <input type="hidden" id="assetType" value="">
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="closeAssetModal()">キャンセル</button>
+                <button class="btn btn-primary" onclick="saveAssetImage()"><i class="fas fa-save"></i> Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 家計簿モーダル -->
+    <div id="budgetModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div class="modal-title">取引を編集</div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+    <div id="fixedModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeFixedModal()">&times;</button>
+            <div class="modal-title">項目を編集</div>
+            <div id="fixedModalBody"></div>
+        </div>
+    </div>
+    
+    <!-- Info Popup -->
+    <div id="infoPopup" class="info-popup">
+        <div class="info-popup-content">
+            <h4 id="infoPopupTitle">💡 Examples</h4>
+            <p id="infoPopupText"></p>
+            <button class="btn btn-primary" onclick="closeInfoPopup()">OK</button>
+        </div>
+    </div>
+    
+    <!-- Page Notice Popup -->
+    <div id="pageNoticePopup" class="info-popup">
+        <div class="info-popup-content">
+            <h4><i class="fas fa-bell"></i> Notice</h4>
+            <p style="line-height: 1.8;">このページは家計簿の詳細と同期していません (previous pages).
+
+月収と支出を一目で把握するためのものです, いつでも変更やリセットができます.
+
+💡 財務計画を独自に評価し、更新が必要な領域を特定するために使用してください!</p>
+            <button class="btn btn-primary" onclick="closePageNotice()">OK</button>
+        </div>
+    </div>
+
+    <!-- Image Preview Modal -->
+    <div id="imagePreviewModal" class="image-preview-modal" onclick="closeImagePreview()">
+        <button class="image-preview-close" onclick="closeImagePreview()">&times;</button>
+        <img id="previewImage" src="" alt="Preview">
+    </div>
+
+    <script>
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'themeChange') {
+                document.body.classList.remove('theme-gray');
+                if (event.data.theme === 'gray') document.body.classList.add('theme-gray');
+            }
+        });
+        const savedTheme = localStorage.getItem('today_app_theme');
+        if (savedTheme === 'gray') document.body.classList.add('theme-gray');
+
+        function formatAmount(amount) {
+            return '¥' + new Intl.NumberFormat('en-US').format(amount);
+        }
+
+        const db = new Dexie('BudgetAppDB_EN');
+        db.version(6).stores({
+            budgets: '++id, date, type, amount, category',
+            goals: 'id',
+            fixedItems: '++id, type, name, amount, note',
+            assetImages: '++id, name, type, imageData, createdAt'
+        });
+
+        let dailyExpenseChartInstance = null;
+        let currentPage = 1;
+        const totalPages = 6;
+        let currentEditingId = null;
+        let currentFixedEditingId = null;
+
+        const tooltipDescriptions = {
+            income: '💡 Examples:\n給料、ボーナス、預金利息、家賃収入、年金受給、配当金、手当、副収入など.\n\n固定・不定期の月収',
+            food: '💡 Examples:\n食料品、スーパー、惣菜、肉、果物など.\n\n月平均食費の見積もり\n\n※ 予算を設定して節約を楽しもう！',
+            saving: '💡 Examples:\n預金、普通預金、貯蓄保険、年金保険、退職金、投資信託、株式、住宅貯蓄など.\n\n資産を増やす支出',
+            fixed: '💡 Examples:\n保険（健康/生命）、光熱費（電気/水道/ガス）、電話代、管理費、家賃、ローン利息、定期券、サブスク（Netflixなど）\n\n毎月必須の支出'
+        };
+
+        const categories = {
+            income: [
+                { value: 'salary',       label: '💵 給料' },
+                { value: 'bonus',        label: '🎉 ボーナス' },
+                { value: 'interest',     label: '🏦 預金利息' },
+                { value: 'rental',       label: '🏠 家賃収入' },
+                { value: 'pension',      label: '👴 年金受給' },
+                { value: 'dividends',    label: '📈 配当金' },
+                { value: 'allowance',    label: '💰 手当' },
+                { value: 'sideincome',   label: '✨ 副収入' },
+                { value: 'other_income', label: '📦 その他' }
+            ],
+            expense: [
+                { value: 'food', label: '🍔 食費' },
+                { value: 'transport', label: '🚌 交通費' },
+                { value: 'shopping', label: '🛍️ 買い物' },
+                { value: 'living', label: '🏠 生活費' },
+                { value: 'events', label: '🎁 イベント' },
+                { value: 'other_expense', label: '📦 その他' }
+            ],
+            saving: [
+                { value: 'deposit', label: '🏦 預金' },
+                { value: 'savings', label: '💎 貯蓄' },
+                { value: 'insurance', label: '🛡️ 貯蓄保険' },
+                { value: 'pension', label: '👴 年金' },
+                { value: 'investment', label: '📈 投資' },
+{ value: 'other_saving', label: '🏠 ローン元金返済' },
+                { value: 'other_saving', label: '📦 その他' }
+            ],
+            fixed: [
+                { value: 'insurance', label: '🛡️ 保険' },
+                { value: 'utilities', label: '💡 光熱費' },
+                { value: 'phone', label: '📱 電話' },
+                { value: 'maintenance', label: '🏢 管理費' },
+                { value: 'rent', label: '🏠 家賃' },
+                { value: 'loan', label: '🏛️ ローン' },
+                { value: 'other_fixed', label: '📦 その他' }
+            ]
+        };
+
+        
+
+        function getTodayDateString() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return year + '-' + month + '-' + day;
+}
+
+        function updateCategoryOptions(type, targetSelect, selectedValue = null) {
+            targetSelect.innerHTML = '';
+            const categoryList = categories[type] || categories.expense;
+            categoryList.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.value;
+                option.textContent = cat.label;
+                if (selectedValue === cat.value) option.selected = true;
+                targetSelect.appendChild(option);
+            });
+        }
+
+        function clearInputFields() {
+            document.getElementById('budgetDate').value = getTodayDateString();
+            document.getElementById('budgetType').value = 'expense';
+            document.getElementById('budgetAmount').value = '';
+            document.getElementById('budgetMemo').value = '';
+            updateCategoryOptions('expense', document.getElementById('budgetCategory'));
+        }
+
+        function showPage(pageNumber) {
+            currentPage = Math.min(Math.max(pageNumber, 1), totalPages);
+            document.querySelectorAll('.page-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('page' + currentPage).classList.add('active');
+            document.getElementById('pageIndicator').textContent = currentPage + ' / 6';
+            document.getElementById('prevPageBtn').disabled = (currentPage === 1);
+            document.getElementById('nextPageBtn').disabled = (currentPage === totalPages);
+            if (currentPage === 1) refreshAllData();
+            if (currentPage === 2) renderMonthlyLedgersView();
+            if (currentPage === 3) { calculateFiveYearStats(); loadGoal(); }
+            if (currentPage === 4) renderFixedItems();
+            if (currentPage === 5) renderAssetSummary();
+if (currentPage === 6) renderAssetGallery();
+        }
+
+        async function saveBudget() {
+            const date = document.getElementById('budgetDate').value;
+            const type = document.getElementById('budgetType').value;
+            const amount = parseInt(document.getElementById('budgetAmount').value, 10);
+            const category = document.getElementById('budgetCategory').value;
+            const memo = document.getElementById('budgetMemo').value.trim();
+            if (!date || !type || !amount || !category || amount <= 0) { alert('すべての必須項目を正しく入力してください。'); return; }
+            try {
+                await db.budgets.add({ timestamp: new Date().getTime(), date, type, amount, category, memo });
+                clearInputFields();
+                refreshAllData();
+                alert('保存しました！');
+            } catch (error) { alert('保存エラー: ' + error.message); }
+        }
+
+async function calculateTotalBalance() {
+    const allBudgets = await db.budgets.toArray();
+    const currentYear = new Date().getFullYear().toString();
+    
+    // 残高ラベルに年を表示
+    document.getElementById('balanceLabel').textContent = currentYear + '年 残高';
+    
+    const yearlyData = allBudgets.filter(entry => entry.date && entry.date.length >= 4 && entry.date.substring(0, 4) === currentYear);
+
+            let income = 0, expense = 0;
+            yearlyData.forEach(entry => { if (entry.type === 'income') income += entry.amount; else expense += entry.amount; });
+            const balance = income - expense;
+            document.getElementById('currentBalance').textContent = formatAmount(balance);
+            localStorage.setItem('moneyBalance', balance);
+            if (window.parent !== window) window.parent.postMessage({ type: 'statsUpdate' }, '*');
+        }
+
+        async function updateMonthlyStats() {
+            const today = getTodayDateString();
+            const currentMonth = today.substring(0, 7);
+            const allBudgets = await db.budgets.toArray();
+            const monthlyData = allBudgets.filter(entry => entry.date.startsWith(currentMonth));
+            let income = 0, expense = 0;
+            const dailyExpenses = {};
+            let typeIncome = 0, typeExpense = 0, typeSaving = 0, typeFixed = 0;
+            
+            monthlyData.forEach(entry => {
+                if (entry.type === 'income') {
+                    income += entry.amount;
+                    typeIncome += entry.amount;
+                } else {
+                    expense += entry.amount;
+                    dailyExpenses[entry.date] = (dailyExpenses[entry.date] || 0) + entry.amount;
+                    if (entry.type === 'expense') typeExpense += entry.amount;
+                    else if (entry.type === 'saving') typeSaving += entry.amount;
+                    else if (entry.type === 'fixed') typeFixed += entry.amount;
+                }
+            });
+            
+            document.getElementById('monthlyIncome').textContent = formatAmount(income);
+            document.getElementById('monthlyExpense').textContent = formatAmount(expense);
+            document.getElementById('monthlyBalance').textContent = formatAmount(income - expense);
+            
+            document.getElementById('typeIncome').textContent = '+' + formatAmount(typeIncome);
+            document.getElementById('typeExpense').textContent = typeExpense > 0 ? '-' + formatAmount(typeExpense) : '¥0';
+            document.getElementById('typeSaving').textContent = typeSaving > 0 ? '-' + formatAmount(typeSaving) : '¥0';
+            document.getElementById('typeFixed').textContent = typeFixed > 0 ? '-' + formatAmount(typeFixed) : '¥0';
+            const totalBalance = typeIncome - typeExpense - typeSaving - typeFixed;
+            document.getElementById('typeTotal').textContent = (totalBalance >= 0 ? '+' : '') + formatAmount(totalBalance);
+            
+            localStorage.setItem('moneyMonthlyBalance', income - expense);
+            if (window.parent !== window) window.parent.postMessage({ type: 'statsUpdate' }, '*');
+            renderDailyExpenseChart(dailyExpenses);
+        }
+
+        function renderDailyExpenseChart(dailyExpenses) {
+            if (dailyExpenseChartInstance) dailyExpenseChartInstance.destroy();
+            const dates = Object.keys(dailyExpenses).sort();
+            const amounts = dates.map(date => dailyExpenses[date]);
+            const ctx = document.getElementById('dailyExpenseChart').getContext('2d');
+            dailyExpenseChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: dates.map(d => d.substring(5)), datasets: [{ label: '日別支出', data: amounts, backgroundColor: 'rgba(239, 68, 68, 0.7)', borderColor: 'rgba(239, 68, 68, 1)', borderWidth: 1 }] },
+                options: { responsive: true, maintainAspectRatio: true, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+            });
+        }
+
+
+ async function renderMonthlyLedgersView() {
+    const allBudgets = await db.budgets.toArray();
+    const monthlyLedgers = {};
+    allBudgets.forEach(entry => { 
+        const month = entry.date.substring(0, 7); 
+        if (!monthlyLedgers[month]) monthlyLedgers[month] = []; 
+        monthlyLedgers[month].push(entry); 
+    });
+    
+    const sortedMonths = Object.keys(monthlyLedgers).sort().reverse();
+    const container = document.getElementById('monthlyLedgersContent');
+    
+    if (sortedMonths.length === 0) { 
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-receipt"></i><p>記録がありません</p></div>'; 
+        return; 
+    }
+    
+    const today = new Date();
+    const currentMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
+    
+    let html = '';
+    sortedMonths.forEach(month => {
+        const entries = monthlyLedgers[month].sort((a, b) => new Date(b.date) - new Date(a.date));
+        let incomeTotal = 0, expenseTotal = 0;
+        entries.forEach(entry => { 
+            if (entry.type === 'income') incomeTotal += entry.amount; 
+            else expenseTotal += entry.amount; 
+        });
+        
+        const isCurrentMonth = (month === currentMonth);
+        const monthId = 'month-' + month.replace(/-/g, '');
+        
+        html += '<div class="ledger-month">';
+        
+        html += '<div class="ledger-month-header" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="toggleMonth(\'' + monthId + '\')">';
+        html += '<span>' + month + '</span>';
+        html += '<i class="fas fa-chevron-' + (isCurrentMonth ? 'up' : 'down') + '" id="icon-' + monthId + '"></i>';
+        html += '</div>';
+        
+        html += '<div class="ledger-month-stats"><span class="income-text">Income: ' + formatAmount(incomeTotal) + '</span><span class="expense-text">Expense: ' + formatAmount(expenseTotal) + '</span></div>';
+        
+        html += '<div id="' + monthId + '" style="display: ' + (isCurrentMonth ? 'block' : 'none') + ';">';
+        html += '<table class="ledger-table"><thead><tr><th>日付</th><th>カテゴリ</th><th>金額</th><th></th></tr></thead><tbody>';
+        
+        entries.forEach(entry => {
+            const categoryList = categories[entry.type] || categories.expense;
+            const categoryLabel = categoryList.find(c => c.value === entry.category)?.label || entry.category;
+            const textClass = entry.type === 'income' ? 'income-text' : entry.type === 'saving' ? 'saving-text' : entry.type === 'fixed' ? 'fixed-text' : 'expense-text';
+            html += '<tr><td>' + entry.date.substring(5) + '</td><td class="' + textClass + '">' + categoryLabel + '</td><td class="' + textClass + '">' + formatAmount(entry.amount) + '</td><td><button class="btn btn-sm btn-secondary" onclick="openBudgetModal(' + entry.id + ')"><i class="fas fa-edit"></i></button></td></tr>';
+        });
+        
+        html += '</tbody></table></div></div>';
+    });
+    
+    container.innerHTML = html;
+}
+
+function toggleMonth(monthId) {
+    const content = document.getElementById(monthId);
+    const icon = document.getElementById('icon-' + monthId);
+    
+    if (!content || !icon) return;
+    
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        icon.className = 'fas fa-chevron-up';
+    } else {
+        content.style.display = 'none';
+        icon.className = 'fas fa-chevron-down';
+    }
+}
+window.toggleMonth = toggleMonth;
+
+
+
+        async function openBudgetModal(id) {
+            currentEditingId = id;
+            const entry = await db.budgets.get(id);
+            if (!entry) { alert('記録が見つかりません。'); return; }
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = '<div class="form-group"><label>日付</label><input type="date" id="modalDate" class="form-input" value="' + entry.date + '"></div><div class="form-group"><label>種類</label><select id="modalType" class="form-select"><option value="income"' + (entry.type === 'income' ? ' selected' : '') + '>収入</option><option value="expense"' + (entry.type === 'expense' ? ' selected' : '') + '>一般支出</option><option value="saving"' + (entry.type === 'saving' ? ' selected' : '') + '>貯蓄</option><option value="fixed"' + (entry.type === 'fixed' ? ' selected' : '') + '>固定費</option></select></div><div class="form-group"><label>金額</label><input type="number" id="modalAmount" class="form-input" value="' + entry.amount + '"></div><div class="form-group"><label>カテゴリ</label><select id="modalCategory" class="form-select"></select></div><div class="form-group"><label>Memo</label><textarea id="modalMemo" class="form-textarea">' + (entry.memo || '') + '</textarea></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveModalBudget()"><i class="fas fa-save"></i> Update</button><button class="btn btn-danger" onclick="deleteBudgetEntry(' + id + ')"><i class="fas fa-trash"></i> Delete</button></div>';
+            updateCategoryOptions(entry.type, document.getElementById('modalCategory'), entry.category);
+            document.getElementById('modalType').onchange = (e) => { updateCategoryOptions(e.target.value, document.getElementById('modalCategory')); };
+            document.getElementById('budgetModal').classList.add('active');
+        }
+
+        function closeModal() { document.getElementById('budgetModal').classList.remove('active'); }
+
+        async function saveModalBudget() {
+            if (!currentEditingId) return;
+            const date = document.getElementById('modalDate').value;
+            const type = document.getElementById('modalType').value;
+            const amount = parseInt(document.getElementById('modalAmount').value, 10);
+            const category = document.getElementById('modalCategory').value;
+            const memo = document.getElementById('modalMemo').value.trim();
+            if (!date || !amount || amount <= 0) { alert('すべての必須項目を正しく入力してください。'); return; }
+            try {
+                const existing = await db.budgets.get(currentEditingId);
+                await db.budgets.put({ id: currentEditingId, timestamp: existing.timestamp, date, type, amount, category, memo });
+                closeModal(); refreshAllData(); renderMonthlyLedgersView();
+            } catch (error) { alert('更新エラー: ' + error.message); }
+        }
+
+        async function deleteBudgetEntry(id) {
+            if (confirm('この記録を削除しますか？')) { await db.budgets.delete(id); closeModal(); refreshAllData(); renderMonthlyLedgersView(); }
+        }
+
+        async function loadGoal() {
+            try {
+                const goal = await db.goals.get(1);
+                const displayArea = document.getElementById('goalDisplayArea');
+                const editArea = document.getElementById('goalEditArea');
+                const displayText = document.getElementById('goalDisplayText');
+                const cancelBtn = document.getElementById('cancelGoalBtn');
+                if (goal && goal.memo && goal.memo.trim() !== '') { displayText.textContent = goal.memo; displayArea.style.display = 'block'; editArea.style.display = 'none'; }
+                else { displayArea.style.display = 'none'; editArea.style.display = 'block'; cancelBtn.style.display = 'none'; document.getElementById('goalMemoInput').value = ''; }
+            } catch (error) { console.error(error); }
+        }
+
+        async function saveGoal() {
+            const memo = document.getElementById('goalMemoInput').value.trim();
+            if (!memo) { alert('目標を入力してください。'); return; }
+            try { await db.goals.put({ id: 1, memo: memo }); alert('目標を保存しました！ 🎯'); loadGoal(); }
+            catch (error) { alert('保存エラー: ' + error.message); }
+        }
+
+        function editGoal() {
+            const displayArea = document.getElementById('goalDisplayArea');
+            const editArea = document.getElementById('goalEditArea');
+            const displayText = document.getElementById('goalDisplayText');
+            const cancelBtn = document.getElementById('cancelGoalBtn');
+            document.getElementById('goalMemoInput').value = displayText.textContent;
+            displayArea.style.display = 'none'; editArea.style.display = 'block'; cancelBtn.style.display = 'inline-flex';
+        }
+
+        function cancelEditGoal() { loadGoal(); }
+
+        async function deleteGoal() {
+            if (confirm('この目標を削除しますか？')) { try { await db.goals.delete(1); alert('目標を削除しました。'); loadGoal(); } catch (error) { alert('削除エラー: ' + error.message); } }
+        }
+
+        async function calculateFiveYearStats() {
+            const allBudgets = await db.budgets.toArray();
+            const currentYear = new Date().getFullYear();
+            const annualStats = {};
+            allBudgets.forEach(entry => { 
+                const year = entry.date.substring(0, 4); 
+                if (!annualStats[year]) annualStats[year] = { income: 0, expense: 0, saving: 0, fixed: 0 }; 
+                if (entry.type === 'income') annualStats[year].income += entry.amount; 
+                else if (entry.type === 'expense') annualStats[year].expense += entry.amount;
+                else if (entry.type === 'saving') annualStats[year].saving += entry.amount;
+                else if (entry.type === 'fixed') annualStats[year].fixed += entry.amount;
+            });
+            
+            const yearsToShow = [];
+            for (let i = 0; i < 5; i++) yearsToShow.push((currentYear + i).toString());
+            
+            const container = document.getElementById('fiveYearStatsContent');
+            if (Object.keys(annualStats).length === 0) { 
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-chart-bar"></i><p>統計データがありません</p></div>'; 
+                return; 
+            }
+            
+            let html = '';
+            yearsToShow.forEach(year => {
+                const stats = annualStats[year] || { income: 0, expense: 0, saving: 0, fixed: 0 };
+                const totalExpense = stats.expense + stats.saving + stats.fixed;
+                const balance = stats.income - totalExpense;
+                
+                if (stats.income > 0 || totalExpense > 0) {
+                    html += '<div class="card" style="margin-bottom: 12px;"><div class="card-title" style="font-size: 1rem;"><i class="fas fa-calendar-alt"></i> ' + year + ' 種類別サマリー</div><div class="type-summary-table"><div class="type-row income-row"><span class="type-label"><i class="fas fa-arrow-down"></i> 収入</span><span class="type-value">+' + formatAmount(stats.income) + '</span></div><div class="type-row expense-row"><span class="type-label"><i class="fas fa-utensils"></i> 一般支出</span><span class="type-value">-' + formatAmount(stats.expense) + '</span></div><div class="type-row saving-row"><span class="type-label"><i class="fas fa-piggy-bank"></i> Savings</span><span class="type-value">-' + formatAmount(stats.saving) + '</span></div><div class="type-row fixed-row"><span class="type-label"><i class="fas fa-file-invoice-dollar"></i> 固定費</span><span class="type-value">-' + formatAmount(stats.fixed) + '</span></div><div class="type-row total-row"><span class="type-label"><i class="fas fa-calculator"></i> 年間残高</span><span class="type-value" style="color: ' + (balance >= 0 ? 'var(--success)' : 'var(--danger)') + ';">' + (balance >= 0 ? '+' : '') + formatAmount(balance) + '</span></div></div></div>';
+                }
+            });
+            
+            if (html === '') {
+                html = '<div class="empty-state"><i class="fas fa-chart-bar"></i><p>No data for the past 5 years</p></div>';
+            }
+            container.innerHTML = html;
+        }
+
+        function showInfoPopup(type) {
+            const titles = { income: '📥 固定収入', food: '🍽️ 月平均食費', saving: '🏦 貯蓄', fixed: '💡 必須支出' };
+            document.getElementById('infoPopupTitle').textContent = titles[type] || '💡 例';
+            document.getElementById('infoPopupText').textContent = tooltipDescriptions[type] || '';
+            document.getElementById('infoPopup').classList.add('active');
+        }
+        function closeInfoPopup() { document.getElementById('infoPopup').classList.remove('active'); }
+        function showPageNotice() { document.getElementById('pageNoticePopup').classList.add('active'); }
+        function closePageNotice() { document.getElementById('pageNoticePopup').classList.remove('active'); }
+
+        async function addFixedItem() {
+            const type = document.getElementById('fixedType').value;
+            const name = document.getElementById('fixedName').value.trim();
+            const amount = parseInt(document.getElementById('fixedAmount').value, 10);
+            const note = document.getElementById('fixedNote').value.trim();
+            if (!name || !amount || amount <= 0) { alert('項目名と金額を入力してください。'); return; }
+            try {
+                await db.fixedItems.add({ type, name, amount, note });
+                document.getElementById('fixedName').value = '';
+                document.getElementById('fixedAmount').value = '';
+                document.getElementById('fixedNote').value = '';
+                renderFixedItems();
+                alert('項目を追加しました！');
+            } catch (error) { alert('追加エラー: ' + error.message); }
+        }
+
+        async function renderFixedItems() {
+            const items = await db.fixedItems.toArray();
+            const container = document.getElementById('fixedItemsList');
+            const summaryContainer = document.getElementById('fixedSummary');
+            const incomeItems = items.filter(i => i.type === 'income');
+            const foodItems = items.filter(i => i.type === 'food');
+            const savingItems = items.filter(i => i.type === 'saving');
+            const fixedItems = items.filter(i => i.type === 'fixed');
+            const incomeTotal = incomeItems.reduce((sum, i) => sum + i.amount, 0);
+            const foodTotal = foodItems.reduce((sum, i) => sum + i.amount, 0);
+            const savingTotal = savingItems.reduce((sum, i) => sum + i.amount, 0);
+            const fixedTotal = fixedItems.reduce((sum, i) => sum + i.amount, 0);
+            const totalExpense = foodTotal + savingTotal + fixedTotal;
+            const remaining = incomeTotal - totalExpense;
+
+            if (items.length === 0) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-clipboard-list"></i><p>固定項目が登録されていません</p><p style="font-size: 0.75rem; margin-top: 8px;">上から項目を追加してください!</p></div>';
+                summaryContainer.style.display = 'none';
+                return;
+            }
+
+            let html = '';
+            html += '<div class="section-box"><div class="section-header income-header"><h3><i class="fas fa-arrow-down"></i> 固定収入 <button class="info-btn" onclick="showInfoPopup(\'income\')">?</button></h3><span class="section-total">' + formatAmount(incomeTotal) + '</span></div><div class="section-items">' + (incomeItems.length > 0 ? incomeItems.map(item => renderFixedItemRow(item, 'income')).join('') : '<div class="empty-section">項目なし</div>') + '</div></div>';
+            html += '<div class="section-box"><div class="section-header food-header"><h3><i class="fas fa-utensils"></i> 月平均食費 <button class="info-btn" onclick="showInfoPopup(\'food\')">?</button></h3><span class="section-total">' + formatAmount(foodTotal) + '</span></div><div class="section-items">' + (foodItems.length > 0 ? foodItems.map(item => renderFixedItemRow(item, 'food')).join('') : '<div class="empty-section">項目なし</div>') + '</div></div>';
+            html += '<div class="section-box"><div class="section-header saving-header"><h3><i class="fas fa-piggy-bank"></i> Savings <button class="info-btn" onclick="showInfoPopup(\'saving\')">?</button></h3><span class="section-total">' + formatAmount(savingTotal) + '</span></div><div class="section-items">' + (savingItems.length > 0 ? savingItems.map(item => renderFixedItemRow(item, 'saving')).join('') : '<div class="empty-section">項目なし</div>') + '</div></div>';
+            html += '<div class="section-box"><div class="section-header fixed-header"><h3><i class="fas fa-file-invoice-dollar"></i> 必須支出 <button class="info-btn" onclick="showInfoPopup(\'fixed\')">?</button></h3><span class="section-total">' + formatAmount(fixedTotal) + '</span></div><div class="section-items">' + (fixedItems.length > 0 ? fixedItems.map(item => renderFixedItemRow(item, 'fixed')).join('') : '<div class="empty-section">項目なし</div>') + '</div></div>';
+            container.innerHTML = html;
+
+            summaryContainer.style.display = 'block';
+            summaryContainer.innerHTML = '<div class="summary-title">📊 Monthly 固定収入/Expense Summary</div><div class="summary-row with-border"><span class="label">📥 Total 固定収入</span><span class="value positive">+' + formatAmount(incomeTotal) + '</span></div><div class="summary-row"><span class="label">🍽️ 月平均食費</span><span class="value">' + formatAmount(foodTotal) + '</span></div><div class="summary-row"><span class="label">🏦 Savings</span><span class="value">' + formatAmount(savingTotal) + '</span></div><div class="summary-row"><span class="label">💡 必須支出</span><span class="value">' + formatAmount(fixedTotal) + '</span></div><div class="summary-row with-border"><span class="label">📤 固定支出合計</span><span class="value negative">-' + formatAmount(totalExpense) + '</span></div><div class="summary-row highlight"><span class="label">💰 残額（使用可能）</span><span class="value ' + (remaining >= 0 ? 'positive' : 'negative') + '">' + (remaining >= 0 ? '+' : '') + formatAmount(remaining) + '</span></div>';
+
+            const yearlyEstimate = document.getElementById('yearlyEstimate');
+            const yearlyIncome = incomeTotal * 12;
+            const yearlyFood = foodTotal * 12;
+            const yearlySaving = savingTotal * 12;
+            const yearlyFixed = fixedTotal * 12;
+            const yearlyTotalExpense = totalExpense * 12;
+            const yearlyRemaining = remaining * 12;
+            
+            yearlyEstimate.style.display = 'block';
+            yearlyEstimate.innerHTML = '<div class="summary-title">📅 年間予測 <span style="font-size: 0.7rem; font-weight: 400; color: var(--text-muted);">(月額 × 12)</span></div><div class="summary-row with-border"><span class="label">📥 年間総収入</span><span class="value positive">+' + formatAmount(yearlyIncome) + '</span></div><div class="summary-row"><span class="label">🍽️ 年間食費</span><span class="value">' + formatAmount(yearlyFood) + '</span></div><div class="summary-row"><span class="label">🏦 年間貯蓄</span><span class="value">' + formatAmount(yearlySaving) + '</span></div><div class="summary-row"><span class="label">💡 Annual 必須支出</span><span class="value">' + formatAmount(yearlyFixed) + '</span></div><div class="summary-row with-border"><span class="label">📤 年間総支出</span><span class="value negative">-' + formatAmount(yearlyTotalExpense) + '</span></div><div class="summary-row highlight"><span class="label">💰 Projected 年間残高</span><span class="value ' + (yearlyRemaining >= 0 ? 'positive' : 'negative') + '">' + (yearlyRemaining >= 0 ? '+' : '') + formatAmount(yearlyRemaining) + '</span></div>';
+        }
+
+        function renderFixedItemRow(item, typeClass) {
+            return '<div class="fixed-item"><div class="item-info"><div class="item-name">' + item.name + '</div>' + (item.note ? '<div class="item-note">' + item.note + '</div>' : '') + '</div><div class="item-amount ' + typeClass + '">' + formatAmount(item.amount) + '</div><div class="item-actions"><button class="btn btn-sm btn-secondary" onclick="openFixedModal(' + item.id + ')"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger" onclick="deleteFixedItem(' + item.id + ')"><i class="fas fa-trash"></i></button></div></div>';
+        }
+
+        async function openFixedModal(id) {
+            currentFixedEditingId = id;
+            const item = await db.fixedItems.get(id);
+            if (!item) { alert('項目が見つかりません。'); return; }
+            const modalBody = document.getElementById('fixedModalBody');
+            modalBody.innerHTML = '<div class="form-group"><label>カテゴリ</label><select id="fixedModalType" class="form-select"><option value="income"' + (item.type === 'income' ? ' selected' : '') + '>固定収入</option><option value="food"' + (item.type === 'food' ? ' selected' : '') + '>月平均食費</option><option value="saving"' + (item.type === 'saving' ? ' selected' : '') + '>貯蓄</option><option value="fixed"' + (item.type === 'fixed' ? ' selected' : '') + '>必須支出</option></select></div><div class="form-group"><label>項目名</label><input type="text" id="fixedModalName" class="form-input" value="' + item.name + '"></div><div class="form-group"><label>金額</label><input type="number" id="fixedModalAmount" class="form-input" value="' + item.amount + '"></div><div class="form-group"><label>Note</label><input type="text" id="fixedModalNote" class="form-input" value="' + (item.note || '') + '"></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveFixedModal()"><i class="fas fa-save"></i> Save</button></div>';
+            document.getElementById('fixedModal').classList.add('active');
+        }
+
+        function closeFixedModal() { document.getElementById('fixedModal').classList.remove('active'); }
+
+        async function saveFixedModal() {
+            if (!currentFixedEditingId) return;
+            const type = document.getElementById('fixedModalType').value;
+            const name = document.getElementById('fixedModalName').value.trim();
+            const amount = parseInt(document.getElementById('fixedModalAmount').value, 10);
+            const note = document.getElementById('fixedModalNote').value.trim();
+            if (!name || !amount || amount <= 0) { alert('項目名と金額を入力してください。'); return; }
+            try { await db.fixedItems.put({ id: currentFixedEditingId, type, name, amount, note }); closeFixedModal(); renderFixedItems(); }
+            catch (error) { alert('更新エラー: ' + error.message); }
+        }
+
+        async function deleteFixedItem(id) { if (confirm('この項目を削除しますか？')) { await db.fixedItems.delete(id); renderFixedItems(); } }
+
+        async function globalReset() {
+            const confirmation = prompt('すべてのデータを削除するには「RESET」と入力してください。');
+            if (confirmation === 'RESET') { await db.budgets.clear(); await db.goals.clear(); await db.fixedItems.clear(); alert('すべてのデータがリセットされました。'); clearInputFields(); refreshAllData(); }
+        }
+
+        async function displayDataAsJson() {
+            const budgets = await db.budgets.toArray();
+            const goals = await db.goals.toArray();
+            const fixedItems = await db.fixedItems.toArray();
+            if (budgets.length === 0 && goals.length === 0 && fixedItems.length === 0) { alert('バックアップするデータがありません。'); return; }
+            const data = JSON.stringify({ budgets, goals, fixedItems }, null, 2);
+            const win = window.open("", "_blank", "width=600,height=600");
+            win.document.write('<h2>バックアップデータ</h2><p style="color: #666;">下のテキストをコピーしてメモ帳に保存してください.</p><textarea style="width: 100%; height: 80%; font-size: 12px;">' + data + '</textarea>');
+            win.document.close();
+        }
+
+        async function importDataFromJson(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (!confirm('復元すると既存のデータが上書きされます。続行しますか？')) { event.target.value = ''; return; }
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    await db.budgets.clear(); await db.goals.clear(); await db.fixedItems.clear();
+                    if (data.budgets?.length > 0) { const budgetsToAdd = data.budgets.map(b => { const { id, ...rest } = b; return rest; }); await db.budgets.bulkAdd(budgetsToAdd); }
+                    if (data.goals?.length > 0) { await db.goals.put({ id: 1, memo: data.goals[0].memo }); }
+                    if (data.fixedItems?.length > 0) { const fixedToAdd = data.fixedItems.map(f => { const { id, ...rest } = f; return rest; }); await db.fixedItems.bulkAdd(fixedToAdd); }
+                    alert('復元完了！'); refreshAllData(); loadGoal(); renderFixedItems();
+                } catch (error) { alert('復元失敗: ' + error.message); }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function refreshAllData() { calculateTotalBalance(); updateMonthlyStats(); }
+
+        function initializeApp() {
+            updateCategoryOptions('expense', document.getElementById('budgetCategory'));
+            document.getElementById('budgetDate').value = getTodayDateString();
+            document.getElementById('budgetType').addEventListener('change', (e) => { updateCategoryOptions(e.target.value, document.getElementById('budgetCategory')); });
+            document.getElementById('saveBudgetBtn').addEventListener('click', saveBudget);
+            document.getElementById('clearInputBtn').addEventListener('click', clearInputFields);
+            document.getElementById('saveGoalBtn').addEventListener('click', saveGoal);
+            document.getElementById('editGoalBtn').addEventListener('click', editGoal);
+            document.getElementById('deleteGoalBtn').addEventListener('click', deleteGoal);
+            document.getElementById('cancelGoalBtn').addEventListener('click', cancelEditGoal);
+            document.getElementById('globalResetBtn').addEventListener('click', globalReset);
+            document.getElementById('addFixedBtn').addEventListener('click', addFixedItem);
+            document.getElementById('prevPageBtn').addEventListener('click', () => showPage(currentPage - 1));
+            document.getElementById('nextPageBtn').addEventListener('click', () => showPage(currentPage + 1));
+            window.onclick = (e) => { 
+                if (e.target === document.getElementById('budgetModal')) closeModal(); 
+                if (e.target === document.getElementById('fixedModal')) closeFixedModal(); 
+                if (e.target === document.getElementById('infoPopup')) closeInfoPopup();
+                if (e.target === document.getElementById('pageNoticePopup')) closePageNotice();
+            };
+            refreshAllData();
+            showPage(1);
+        }
+
+        window.onload = initializeApp;
+        window.openBudgetModal = openBudgetModal;
+        window.saveModalBudget = saveModalBudget;
+        window.deleteBudgetEntry = deleteBudgetEntry;
+        window.closeModal = closeModal;
+        window.openFixedModal = openFixedModal;
+        window.saveFixedModal = saveFixedModal;
+        window.deleteFixedItem = deleteFixedItem;
+        window.closeFixedModal = closeFixedModal;
+        window.showInfoPopup = showInfoPopup;
+        window.closeInfoPopup = closeInfoPopup;
+        window.showPageNotice = showPageNotice;
+        window.closePageNotice = closePageNotice;
+        window.displayDataAsJson = displayDataAsJson;
+        window.importDataFromJson = importDataFromJson;
+
+        function toggleBackupSection() {
+            const section = document.getElementById('backupSection');
+            const icon = document.getElementById('backupToggleIcon');
+            const text = document.getElementById('backupToggleText');
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+                icon.className = 'fas fa-chevron-up';
+                text.textContent = 'バックアップ/リセットを閉じる';
+            } else {
+                section.style.display = 'none';
+                icon.className = 'fas fa-chevron-down';
+                text.textContent = 'バックアップ/リセットを展開';
+            }
+        }
+        window.toggleBackupSection = toggleBackupSection;
+
+        function togglePastYears() {
+            const section = document.getElementById('pastYearsSection');
+            const text = document.getElementById('pastYearsText');
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+                text.textContent = '過去の年を閉じる';
+                loadPastYears();
+            } else {
+                section.style.display = 'none';
+                text.textContent = '過去の年を表示';
+            }
+        }
+        window.togglePastYears = togglePastYears;
+
+        async function loadPastYears() {
+            const allBudgets = await db.budgets.toArray();
+            const annualStats = {};
+            allBudgets.forEach(entry => {
+                const year = entry.date.substring(0, 4);
+                if (!annualStats[year]) annualStats[year] = { income: 0, expense: 0, saving: 0, fixed: 0 };
+                if (entry.type === 'income') annualStats[year].income += entry.amount;
+                else if (entry.type === 'expense') annualStats[year].expense += entry.amount;
+                else if (entry.type === 'saving') annualStats[year].saving += entry.amount;
+                else if (entry.type === 'fixed') annualStats[year].fixed += entry.amount;
+            });
+            
+            const currentYear = new Date().getFullYear();
+            const pastYears = Object.keys(annualStats).map(y => parseInt(y)).filter(y => y < currentYear).sort((a, b) => b - a);
+            const container = document.getElementById('pastYearsContent');
+            
+            if (pastYears.length === 0) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-folder-open"></i><p>過去の年のデータがありません</p></div>';
+                return;
+            }
+            
+            let html = '';
+            pastYears.forEach(year => {
+                const stats = annualStats[year];
+                const totalExpense = stats.expense + stats.saving + stats.fixed;
+                const balance = stats.income - totalExpense;
+                html += '<div class="card" style="margin-bottom: 12px;"><div class="card-title" style="font-size: 1rem;"><i class="fas fa-calendar-alt"></i> ' + year + ' 種類別サマリー</div><div class="type-summary-table"><div class="type-row income-row"><span class="type-label"><i class="fas fa-arrow-down"></i> 収入</span><span class="type-value">+' + formatAmount(stats.income) + '</span></div><div class="type-row expense-row"><span class="type-label"><i class="fas fa-utensils"></i> 一般支出</span><span class="type-value">-' + formatAmount(stats.expense) + '</span></div><div class="type-row saving-row"><span class="type-label"><i class="fas fa-piggy-bank"></i> Savings</span><span class="type-value">-' + formatAmount(stats.saving) + '</span></div><div class="type-row fixed-row"><span class="type-label"><i class="fas fa-file-invoice-dollar"></i> 固定費</span><span class="type-value">-' + formatAmount(stats.fixed) + '</span></div><div class="type-row total-row"><span class="type-label"><i class="fas fa-calculator"></i> 年間残高</span><span class="type-value" style="color: ' + (balance >= 0 ? 'var(--success)' : 'var(--danger)') + ';">' + (balance >= 0 ? '+' : '') + formatAmount(balance) + '</span></div></div></div>';
+            });
+            container.innerHTML = html;
+        }
+
+        async function mobileBackup() {
+            const budgets = await db.budgets.toArray();
+            const goals = await db.goals.toArray();
+            const fixedItems = await db.fixedItems.toArray();
+            if (budgets.length === 0 && goals.length === 0 && fixedItems.length === 0) { alert('バックアップするデータがありません。'); return; }
+            const data = JSON.stringify({ budgets, goals, fixedItems }, null, 2);
+            const today = new Date().toISOString().slice(0, 10);
+            const fileName = 'Budget_Backup_' + today + '.json';
+            
+            if (navigator.share && navigator.canShare) {
+                const file = new File([data], fileName, { type: 'application/json' });
+                if (navigator.canShare({ files: [file] })) {
+                    try { await navigator.share({ files: [file], title: '家計簿バックアップ', text: '家計簿バックアップファイル.' }); return; } 
+                    catch (err) { if (err.name === 'AbortError') return; }
+                }
+                try { await navigator.share({ title: '家計簿バックアップ', text: data }); return; } 
+                catch (err) { if (err.name === 'AbortError') return; }
+            }
+            try { await navigator.clipboard.writeText(data); alert('バックアップデータをクリップボードにコピーしました！\n\nメモアプリに貼り付けるか、自分に送信してください。'); } 
+            catch (err) { displayDataAsJson(); }
+        }
+        window.mobileBackup = mobileBackup;
+
+        let currentAssetType = '';
+
+        function openAssetModal(type) {
+            currentAssetType = type;
+            document.getElementById('assetType').value = type;
+            document.getElementById('assetName').value = '';
+            document.getElementById('assetImageInput').value = '';
+            let title = '💰 貯蓄画像を追加';
+            if (type === 'fixed') title = '💡 固定費画像を追加';
+            if (type === 'other') title = '📁 その他の書類画像を追加';
+            document.getElementById('assetModalTitle').textContent = title;
+            document.getElementById('assetModal').classList.add('active');
+        }
+        window.openAssetModal = openAssetModal;
+
+        function closeAssetModal() { document.getElementById('assetModal').classList.remove('active'); }
+        window.closeAssetModal = closeAssetModal;
+
+        async function saveAssetImage() {
+            const name = document.getElementById('assetName').value.trim();
+            const fileInput = document.getElementById('assetImageInput');
+            const type = document.getElementById('assetType').value;
+            if (!name) { alert('書類名を入力してください。'); return; }
+            if (!fileInput.files[0]) { alert('画像を選択してください。'); return; }
+            const images = await db.assetImages.where('type').equals(type).toArray();
+            if (images.length >= 10) { alert('カテゴリごとに最大10枚の画像が登録可能です.\n既存の画像を先に削除してください。'); return; }
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                await db.assetImages.add({ name: name, type: type, imageData: e.target.result, createdAt: new Date().toISOString() });
+                closeAssetModal();
+                renderAssetGallery();
+                alert('保存しました！ ✅');
+            };
+            reader.readAsDataURL(file);
+        }
+        window.saveAssetImage = saveAssetImage;
+
+        async function renderAssetGallery() {
+            const allImages = await db.assetImages.toArray();
+            const savingImages = allImages.filter(img => img.type === 'saving');
+            const fixedImages = allImages.filter(img => img.type === 'fixed');
+            const otherImages = allImages.filter(img => img.type === 'other');
+            
+            const savingContainer = document.getElementById('savingAssets');
+            if (savingImages.length === 0) { savingContainer.innerHTML = '<div class="asset-table-empty"><i class="fas fa-image"></i> 画像が登録されていません</div>'; }
+            else { let html = ''; savingImages.forEach(img => { html += '<div class="asset-card"><img class="asset-card-image" src="' + img.imageData + '" onclick="openImagePreview(\'' + img.imageData.replace(/'/g, "\\'") + '\')" alt="' + img.name + '"><div class="asset-card-info"><div class="asset-card-name" title="' + img.name + '">' + img.name + '</div><button class="asset-card-delete" onclick="deleteAssetImage(' + img.id + ')"><i class="fas fa-trash"></i> Delete</button></div></div>'; }); savingContainer.innerHTML = html; }
+            
+            const fixedContainer = document.getElementById('fixedAssets');
+            if (fixedImages.length === 0) { fixedContainer.innerHTML = '<div class="asset-table-empty"><i class="fas fa-image"></i> 画像が登録されていません</div>'; }
+            else { let html = ''; fixedImages.forEach(img => { html += '<div class="asset-card"><img class="asset-card-image" src="' + img.imageData + '" onclick="openImagePreview(\'' + img.imageData.replace(/'/g, "\\'") + '\')" alt="' + img.name + '"><div class="asset-card-info"><div class="asset-card-name" title="' + img.name + '">' + img.name + '</div><button class="asset-card-delete" onclick="deleteAssetImage(' + img.id + ')"><i class="fas fa-trash"></i> Delete</button></div></div>'; }); fixedContainer.innerHTML = html; }
+            
+            const otherContainer = document.getElementById('otherAssets');
+            if (otherImages.length === 0) { otherContainer.innerHTML = '<div class="asset-table-empty"><i class="fas fa-image"></i> 画像が登録されていません</div>'; }
+            else { let html = ''; otherImages.forEach(img => { html += '<div class="asset-card"><img class="asset-card-image" src="' + img.imageData + '" onclick="openImagePreview(\'' + img.imageData.replace(/'/g, "\\'") + '\')" alt="' + img.name + '"><div class="asset-card-info"><div class="asset-card-name" title="' + img.name + '">' + img.name + '</div><button class="asset-card-delete" onclick="deleteAssetImage(' + img.id + ')"><i class="fas fa-trash"></i> Delete</button></div></div>'; }); otherContainer.innerHTML = html; }
+        }
+
+        async function deleteAssetImage(id) { if (confirm('この画像を削除しますか？')) { await db.assetImages.delete(id); renderAssetGallery(); } }
+        window.deleteAssetImage = deleteAssetImage;
+
+        function openImagePreview(src) { document.getElementById('previewImage').src = src; document.getElementById('imagePreviewModal').classList.add('active'); }
+        window.openImagePreview = openImagePreview;
+
+        function closeImagePreview() { document.getElementById('imagePreviewModal').classList.remove('active'); }
+        window.closeImagePreview = closeImagePreview;
+
+        document.addEventListener('DOMContentLoaded', () => { renderAssetGallery(); });
+        document.getElementById('assetModal').addEventListener('click', (e) => { if (e.target.id === 'assetModal') closeAssetModal(); });
+
+        let recognition = null;
+        let isRecording = false;
+        let currentVoiceTarget = null;
+        let currentVoiceBtn = null;
+
+        function toggleVoiceInput(targetId) {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) { alert('このブラウザは音声認識に対応していません.\nChromeまたはEdgeをご利用ください。'); return; }
+            if (isRecording) { stopVoiceInput(); } else { startVoiceInput(targetId, event.target.closest('.voice-btn')); }
+        }
+
+        function startVoiceInput(targetId, btn) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'ja-JP';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            currentVoiceTarget = document.getElementById(targetId);
+            currentVoiceBtn = btn;
+            recognition.onstart = () => { isRecording = true; if (currentVoiceBtn) { currentVoiceBtn.classList.add('recording'); currentVoiceBtn.innerHTML = '<i class="fas fa-stop"></i>'; } };
+            recognition.onresult = (event) => { const transcript = event.results[0][0].transcript; if (currentVoiceTarget) { if (currentVoiceTarget.type === 'number') { const numbers = transcript.replace(/[^0-9]/g, ''); currentVoiceTarget.value = numbers; } else { currentVoiceTarget.value += transcript; } } stopVoiceInput(); };
+            recognition.onerror = (event) => { console.log('Voice recognition error:', event.error); stopVoiceInput(); if (event.error === 'not-allowed') { alert('マイクの許可が必要です.\nブラウザ設定でマイクを許可してください。'); } };
+            recognition.onend = () => { stopVoiceInput(); };
+            recognition.start();
+        }
+
+        function stopVoiceInput() {
+            if (recognition) { isRecording = false; recognition.stop(); if (currentVoiceBtn) { currentVoiceBtn.classList.remove('recording'); currentVoiceBtn.innerHTML = '<i class="fas fa-microphone"></i>'; } currentVoiceTarget = null; currentVoiceBtn = null; }
+        }
+        window.toggleVoiceInput = toggleVoiceInput;
+
+
+// 資産現況要約 (新5ページ)
+let assetSummaryData = { assets: [], debts: [], bgImage: '' };
+
+async function loadAssetSummary() {
+    const saved = localStorage.getItem('assetSummary_ja');
+    if (saved) {
+        assetSummaryData = JSON.parse(saved);
+    }
+    renderAssetSummary();
+}
+
+function saveAssetSummary() {
+    localStorage.setItem('assetSummary_ja', JSON.stringify(assetSummaryData));
+}
+
+function renderAssetSummary() {
+    const assetList = document.getElementById('assetSummaryList');
+    const debtList = document.getElementById('debtSummaryList');
+    
+    if (!assetList || !debtList) return;
+    
+    if (assetSummaryData.bgImage) {
+        const card = document.querySelector('#page5 .card');
+        if (card) {
+            card.style.backgroundImage = 'url(' + assetSummaryData.bgImage + ')';
+            card.style.backgroundSize = 'cover';
+            card.style.backgroundPosition = 'center';
+        }
+    }
+    
+    if (assetSummaryData.assets.length === 0) {
+        assetList.innerHTML = '<div class="empty-section">登録された資産がありません</div>';
+    } else {
+        let html = '';
+        assetSummaryData.assets.forEach(function(item, index) {
+            html += '<div class="fixed-item">';
+            html += '<div class="item-info">';
+            html += '<div class="item-name">' + item.name + '</div>';
+            if (item.note) html += '<div class="item-note">' + item.note + '</div>';
+            html += '</div>';
+            html += '<div class="item-amount income">' + formatAmount(item.amount) + '</div>';
+            html += '<div class="item-actions">';
+            html += '<button class="btn btn-sm btn-secondary" onclick="editAssetSummaryItem(\'asset\',' + index + ')"><i class="fas fa-edit"></i></button>';
+            html += '<button class="btn btn-sm btn-danger" onclick="deleteAssetSummaryItem(\'asset\',' + index + ')"><i class="fas fa-trash"></i></button>';
+            html += '</div></div>';
+        });
+        assetList.innerHTML = html;
+    }
+    
+    if (assetSummaryData.debts.length === 0) {
+        debtList.innerHTML = '<div class="empty-section">登録された負債がありません</div>';
+    } else {
+        let html = '';
+        assetSummaryData.debts.forEach(function(item, index) {
+            html += '<div class="fixed-item">';
+            html += '<div class="item-info">';
+            html += '<div class="item-name">' + item.name + '</div>';
+            if (item.note) html += '<div class="item-note">' + item.note + '</div>';
+            html += '</div>';
+            html += '<div class="item-amount" style="color: var(--warning);">' + formatAmount(item.amount) + '</div>';
+            html += '<div class="item-actions">';
+            html += '<button class="btn btn-sm btn-secondary" onclick="editAssetSummaryItem(\'debt\',' + index + ')"><i class="fas fa-edit"></i></button>';
+            html += '<button class="btn btn-sm btn-danger" onclick="deleteAssetSummaryItem(\'debt\',' + index + ')"><i class="fas fa-trash"></i></button>';
+            html += '</div></div>';
+        });
+        debtList.innerHTML = html;
+    }
+}
+
+function addAssetSummaryItem(type) {
+    const typeName = type === 'asset' ? '資産' : '負債';
+    const name = prompt(typeName + '名を入力してください\n（例：マンション、預金、担保ローン等）');
+    if (!name) return;
+    
+    const amountStr = prompt('金額を入力してください');
+    if (!amountStr) return;
+    const amount = parseInt(amountStr.replace(/[^\d]/g, ''));
+    if (!amount || amount <= 0) {
+        alert('正しい金額を入力してください');
+        return;
+    }
+    
+    const note = prompt('メモ（任意）', '');
+    
+    const item = { name: name, amount: amount, note: note || '' };
+    
+    if (type === 'asset') {
+        assetSummaryData.assets.push(item);
+    } else {
+        assetSummaryData.debts.push(item);
+    }
+    
+    saveAssetSummary();
+    renderAssetSummary();
+}
+
+function editAssetSummaryItem(type, index) {
+    const list = type === 'asset' ? assetSummaryData.assets : assetSummaryData.debts;
+    const item = list[index];
+    const typeName = type === 'asset' ? '資産' : '負債';
+    
+    const name = prompt(typeName + '名を修正', item.name);
+    if (!name) return;
+    
+    const amountStr = prompt('金額を修正', item.amount);
+    if (!amountStr) return;
+    const amount = parseInt(amountStr.toString().replace(/[^\d]/g, ''));
+    if (!amount || amount <= 0) {
+        alert('正しい金額を入力してください');
+        return;
+    }
+    
+    const note = prompt('メモを修正', item.note);
+    
+    list[index] = { name: name, amount: amount, note: note || '' };
+    saveAssetSummary();
+    renderAssetSummary();
+}
+
+function deleteAssetSummaryItem(type, index) {
+    const list = type === 'asset' ? assetSummaryData.assets : assetSummaryData.debts;
+    
+    if (confirm('"' + list[index].name + '"項目を削除しますか？')) {
+        list.splice(index, 1);
+        saveAssetSummary();
+        renderAssetSummary();
+    }
+}
+
+function selectSummaryBgImage() {
+    document.getElementById('summaryBgInput').click();
+}
+
+function handleSummaryBgUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        assetSummaryData.bgImage = e.target.result;
+        saveAssetSummary();
+        renderAssetSummary();
+        alert('背景画像が設定されました！ 🖼️');
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeSummaryBgImage() {
+    if (confirm('背景画像を削除しますか？')) {
+        assetSummaryData.bgImage = '';
+        const card = document.querySelector('#page5 .card');
+        if (card) {
+            card.style.backgroundImage = '';
+        }
+        saveAssetSummary();
+        alert('背景画像が削除されました！');
+    }
+}
+
+window.addAssetSummaryItem = addAssetSummaryItem;
+window.editAssetSummaryItem = editAssetSummaryItem;
+window.deleteAssetSummaryItem = deleteAssetSummaryItem;
+window.selectSummaryBgImage = selectSummaryBgImage;
+window.handleSummaryBgUpload = handleSummaryBgUpload;
+window.removeSummaryBgImage = removeSummaryBgImage;
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('assetSummaryList')) {
+        loadAssetSummary();
+    }
+});
+
+    </script>
+
+    </script>
+</body>
+</html>

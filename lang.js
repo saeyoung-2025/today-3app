@@ -564,30 +564,31 @@ function setLanguage(lang) {
         currentLang = lang;
         localStorage.setItem('appLanguage', lang);
         applyLanguage();
-
-        // iframe을 reload → 각 파일이 localStorage에서 언어 읽어서 반영
-        const frames = ['todoFrame', 'diaryFrame', 'moneyFrame'];
-        frames.forEach(function(id) {
-            const frame = document.getElementById(id);
-            if (frame && frame.src) {
-                try {
-                    // postMessage 먼저 시도
-                    frame.contentWindow.postMessage({ type: 'languageChange', lang: lang }, '*');
-                } catch(e) {}
-                // reload로 확실히 반영
-                const currentSrc = frame.src;
-                frame.src = '';
-                setTimeout(function() { frame.src = currentSrc; }, 50);
-            }
-        });
-
-        // 홈화면 갱신
-        if (typeof updateHomeStats === 'function') updateHomeStats();
-        if (typeof updateDateDisplay === 'function') updateDateDisplay();
-
-        // 언어 메뉴 닫기
-        const menu = document.getElementById('langMenu');
-        if (menu) menu.classList.remove('active');
+        
+        // iframe src 변경
+        const suffix = lang === 'en' ? '-en' : (lang === 'ja' ? '-ja' : (lang === 'zh' ? '-zh' : ''));
+        const todoFrame = document.getElementById('todoFrame');
+        const diaryFrame = document.getElementById('diaryFrame');
+        const moneyFrame = document.getElementById('moneyFrame');
+        
+        if (todoFrame) {
+            todoFrame.src = 'todo' + suffix + '.html';
+            todoFrame.onload = function() {
+                todoFrame.contentWindow.postMessage({ type: 'languageChange', lang: lang }, '*');
+            };
+        }
+        if (diaryFrame) {
+            diaryFrame.src = 'diary' + suffix + '.html';
+            diaryFrame.onload = function() {
+                diaryFrame.contentWindow.postMessage({ type: 'languageChange', lang: lang }, '*');
+            };
+        }
+        if (moneyFrame) {
+            moneyFrame.src = 'money' + suffix + '.html';
+            moneyFrame.onload = function() {
+                moneyFrame.contentWindow.postMessage({ type: 'languageChange', lang: lang }, '*');
+            };
+        }
     }
 }
 
