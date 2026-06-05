@@ -9,7 +9,7 @@
     <script src="https://unpkg.com/dexie@3.2.3/dist/dexie.js"></script><script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* ── 가계부 - TodayTab 고유 스타일 ── */
-        body { background: #f5f0e8; }
+        body { background: transparent; }
         
         .blob-1{width:220px;height:220px;top:-60px;left:-40px;background:#ffa040;}
         .blob-2{width:170px;height:170px;top:20px;right:-30px;background:#a8e6cf;}
@@ -83,7 +83,7 @@
 </div>
 
 <div class="container">
-    <div class="page-header"><h1><i class="fas fa-wallet"></i> 가계부</h1></div>
+    <div class="page-header"><h1><i class="fas fa-wallet"></i><span data-i18n="budget">가계부</span></h1></div>
 
     <div class="balance-card">
         <div class="balance-label" id="balanceLabel">잔액</div>
@@ -103,18 +103,18 @@
             <div class="form-group"><label>날짜</label><input type="date" id="budgetDate" class="form-input"></div>
             <div class="form-group"><label>유형</label>
                 <select id="budgetType" class="form-select">
-                    <option value="income">수입</option>
-                    <option value="expense">일반지출 (식비 등)</option>
-                    <option value="saving">저축성지출</option>
-                    <option value="fixed">비저축성지출</option>
+                    <option value="income" data-i18n="income">수입</option>
+                    <option value="expense" data-i18n="generalExpense">일반지출 (식비 등)</option>
+                    <option value="saving" data-i18n="savingExpense">저축성지출</option>
+                    <option value="fixed" data-i18n="fixedExpense">비저축성지출</option>
                 </select>
             </div>
-            <div class="form-group"><label>금액 (원)</label><div style="position:relative"><input type="number" id="budgetAmount" class="form-input" placeholder="금액을 입력하세요" min="1" style="padding-right:44px"><button type="button" onclick="toggleVoiceInput('budgetAmount')" class="voice-btn"><i class="fas fa-microphone"></i></button></div></div>
+            <div class="form-group"><label>금액 (원)</label><div style="position:relative"><input type="number" id="budgetAmount" class="form-input" placeholder="금액을 입력하세요" data-i18n-placeholder="enterAmount" min="1" style="padding-right:44px"><button type="button" onclick="toggleVoiceInput('budgetAmount')" class="voice-btn"><i class="fas fa-microphone"></i></button></div></div>
             <div class="form-group"><label>분류</label><select id="budgetCategory" class="form-select"></select></div>
-            <div class="form-group"><label>메모 (선택)</label><div style="position:relative"><textarea id="budgetMemo" class="form-textarea" placeholder="간단한 메모"></textarea><button type="button" onclick="toggleVoiceInput('budgetMemo')" class="voice-btn voice-btn-textarea"><i class="fas fa-microphone"></i></button></div></div>
+            <div class="form-group"><label>메모 (선택)</label><div style="position:relative"><textarea id="budgetMemo" class="form-textarea" placeholder="간단한 메모" data-i18n-placeholder="simpleMemo"></textarea><button type="button" onclick="toggleVoiceInput('budgetMemo')" class="voice-btn voice-btn-textarea"><i class="fas fa-microphone"></i></button></div></div>
             <div class="action-buttons">
-                <button class="btn btn-secondary" id="clearInputBtn"><i class="fas fa-eraser"></i> 초기화</button>
-                <button class="btn btn-success" id="saveBudgetBtn"><i class="fas fa-save"></i> 저장</button>
+                <button class="btn btn-secondary" id="clearInputBtn"><i class="fas fa-eraser"></i> <span data-i18n="reset">초기화</span></button>
+                <button class="btn btn-success" id="saveBudgetBtn"><i class="fas fa-save"></i> <span data-i18n="save">저장</span></button>
             </div>
         </div>
         <div class="card">

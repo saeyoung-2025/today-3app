@@ -565,20 +565,29 @@ function setLanguage(lang) {
         localStorage.setItem('appLanguage', lang);
         applyLanguage();
 
-        // postMessage로 각 iframe에 언어 변경 전달
+        // iframe을 reload → 각 파일이 localStorage에서 언어 읽어서 반영
         const frames = ['todoFrame', 'diaryFrame', 'moneyFrame'];
         frames.forEach(function(id) {
             const frame = document.getElementById(id);
-            if (frame) {
+            if (frame && frame.src) {
                 try {
+                    // postMessage 먼저 시도
                     frame.contentWindow.postMessage({ type: 'languageChange', lang: lang }, '*');
                 } catch(e) {}
+                // reload로 확실히 반영
+                const currentSrc = frame.src;
+                frame.src = '';
+                setTimeout(function() { frame.src = currentSrc; }, 50);
             }
         });
 
-        // 홈화면 통계 업데이트
+        // 홈화면 갱신
         if (typeof updateHomeStats === 'function') updateHomeStats();
         if (typeof updateDateDisplay === 'function') updateDateDisplay();
+
+        // 언어 메뉴 닫기
+        const menu = document.getElementById('langMenu');
+        if (menu) menu.classList.remove('active');
     }
 }
 

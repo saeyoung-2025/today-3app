@@ -7,9 +7,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="common.css">
     <script src="https://unpkg.com/dexie@3.2.3/dist/dexie.js"></script>
+    <script src="lang.js"></script>
     <style>
         /* ── 할 일 - TodayTab 고유 스타일 ── */
-        body { background: #f0ede8; }
+        body { background: transparent; }
         
         .blob-1{width:210px;height:210px;top:-60px;left:-50px;background:#a8e6cf;}
         .blob-2{width:170px;height:170px;top:20px;right:-30px;background:#ffd3a5;}
@@ -121,7 +122,7 @@
 
 <div class="container">
     <div class="page-header">
-        <h1><i class="fas fa-check-circle"></i> 할 일</h1>
+        <h1><i class="fas fa-check-circle"></i><span data-i18n="todo">할 일</span></h1>
     </div>
 
     <!-- nav (접기 상태) -->
@@ -141,10 +142,10 @@
         <div class="card">
             <div class="add-todo-group">
                 <div class="input-wrapper">
-                    <input type="text" id="newTodo" class="todo-input" placeholder="할 일을 입력하세요..." style="padding-right:44px">
+                    <input type="text" id="newTodo" class="todo-input" placeholder="할 일을 입력하세요..." data-i18n-placeholder="enterTodo" style="padding-right:44px">
                     <button type="button" onclick="toggleVoiceInput('newTodo')" class="voice-btn"><i class="fas fa-microphone"></i></button>
                 </div>
-                <button class="btn btn-primary" onclick="addTodo()"><i class="fas fa-plus"></i> 추가</button>
+                <button class="btn btn-primary" onclick="addTodo()"><i class="fas fa-plus"></i> <span data-i18n="add">추가</span></button>
             </div>
         </div>
 
@@ -165,7 +166,7 @@
             <div class="todo-list" id="todoList">
                 <div class="empty-state"><i class="fas fa-clipboard-list"></i><p>등록된 할 일이 없습니다</p></div>
             </div>
-            <button class="btn-save" onclick="saveToStats()"><i class="fas fa-save"></i> 오늘 점수 저장</button>
+            <button class="btn-save" onclick="saveToStats()"><i class="fas fa-save"></i> <span data-i18n="saveTodayScore">오늘 점수 저장</span></button>
         </div>
 
         <div class="info-box"><i class="fas fa-info-circle"></i> 매일 자정에 체크박스가 초기화됩니다</div>
