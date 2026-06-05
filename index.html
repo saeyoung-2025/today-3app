@@ -44,7 +44,7 @@
             z-index: 1;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            overflow: visible;
         }
 
         /* ── 오로라 배경 ── */
@@ -100,7 +100,7 @@
         .hbtn:hover { background: rgba(255,255,255,0.7); color: var(--accent); }
 
         /* ── 페이지 ── */
-        .page-content { display: none; flex: 1; overflow: hidden; position: relative; z-index: 5; }
+        .page-content { display: none; flex: 1; overflow: hidden; position: relative; z-index: 5; background: transparent; }
         .page-content.active { display: flex; flex-direction: column; }
         #homePage { padding: 0 16px 100px; overflow-y: auto; }
 
@@ -287,8 +287,8 @@
         .logo-banner-container.show-hide-btn .logo-banner-hide-btn { pointer-events: auto; }
 
         /* ── iframe ── */
-        .iframe-container { flex: 1; width: 100%; overflow: hidden; }
-        .iframe-container iframe { width: 100%; height: 100%; border: none; }
+        .iframe-container { flex: 1; width: 100%; overflow: hidden; background: transparent; }
+        .iframe-container iframe { width: 100%; height: 100%; border: none; background: transparent; }
 
         /* ── 하단 nav ── */
         .bottom-nav {
@@ -436,7 +436,7 @@
             <button class="hbtn info-btn">
                 <i class="fas fa-info"></i>
                 <div class="info-tooltip">
-                    <h4><i class="fas fa-lightbulb"></i> 사용 안내</h4>
+                    <h4><i class="fas fa-lightbulb"></i> <span data-i18n="usageGuide">사용 안내</span></h4>
                     <div class="info-item"><i class="fas fa-database"></i><span>로컬 저장으로 오프라인에서도 사용 가능합니다</span></div>
                     <div class="info-item"><i class="fas fa-shield-halved"></i><span>인터넷에 노출되지 않아 보안이 완벽합니다</span></div>
                     <div class="info-item"><i class="fas fa-cloud-arrow-up"></i><span>백업은 메모장 저장 후 불러오기로 복원 가능합니다</span></div>
@@ -451,7 +451,7 @@
     <div id="homePage" class="page-content active">
         <div class="greeting-area">
             <p class="date-text" id="dateDisplay"></p>
-            <h2 class="greeting-text" data-i18n="greeting">오늘도 좋은 하루 되세요 ✨</h2>
+            <h2 class="greeting-text" data-i18n="greeting"><span data-i18n="greeting">오늘도 좋은 하루 되세요 ✨</span></h2>
         </div>
 
         <div class="quick-stats">
@@ -464,7 +464,7 @@
             <div class="hidden-placeholder" onclick="toggleCard('todo')">
                 <i class="fas fa-check-circle" style="color:var(--accent)"></i>
                 <span data-i18n="todo">할 일</span>
-                <small style="margin-left:auto;color:var(--accent);font-size:11px;">펼치기 ▶</small>
+                <small style="margin-left:auto;color:var(--accent);font-size:11px;" data-i18n="expand">펼치기 ▶</small>
             </div>
             <div class="card" onclick="showPage('todo')">
                 <div class="card-header">
@@ -488,7 +488,7 @@
             <div class="hidden-placeholder" onclick="toggleCard('diary')">
                 <i class="fas fa-book" style="color:var(--accent)"></i>
                 <span data-i18n="diary">일기</span>
-                <small style="margin-left:auto;color:var(--accent);font-size:11px;">펼치기 ▶</small>
+                <small style="margin-left:auto;color:var(--accent);font-size:11px;" data-i18n="expand">펼치기 ▶</small>
             </div>
             <div class="card" onclick="showPage('diary')">
                 <div class="card-header">
@@ -512,7 +512,7 @@
             <div class="hidden-placeholder" onclick="toggleCard('money')">
                 <i class="fas fa-wallet" style="color:var(--accent)"></i>
                 <span data-i18n="budget">가계부</span>
-                <small style="margin-left:auto;color:var(--accent);font-size:11px;">펼치기 ▶</small>
+                <small style="margin-left:auto;color:var(--accent);font-size:11px;" data-i18n="expand">펼치기 ▶</small>
             </div>
             <div class="card" onclick="showPage('money')">
                 <div class="card-header">
@@ -561,9 +561,9 @@
     </div>
 
     <!-- 서브 페이지 -->
-    <div id="todoPage"  class="page-content"><div class="iframe-container"><iframe src="todo.html"  id="todoFrame"></iframe></div></div>
-    <div id="diaryPage" class="page-content"><div class="iframe-container"><iframe src="diary.html" id="diaryFrame"></iframe></div></div>
-    <div id="moneyPage" class="page-content"><div class="iframe-container"><iframe src="money.html" id="moneyFrame"></iframe></div></div>
+    <div id="todoPage"  class="page-content"><div class="iframe-container"><iframe src="todo.html"  id="todoFrame" allowtransparency="true" style="background:transparent"></iframe></div></div>
+    <div id="diaryPage" class="page-content"><div class="iframe-container"><iframe src="diary.html" id="diaryFrame" allowtransparency="true" style="background:transparent"></iframe></div></div>
+    <div id="moneyPage" class="page-content"><div class="iframe-container"><iframe src="money.html" id="moneyFrame" allowtransparency="true" style="background:transparent"></iframe></div></div>
 
     <!-- 링크 모달 -->
     <div class="link-modal" id="linkModal">
@@ -736,7 +736,7 @@ function renderQuickLinks(){
         if(linkEditMode) h += `<div class="quick-link" onclick="openEditLink(${i})"><div class="quick-link-icon" style="background:${l.color}"><i class="${l.icon}"></i></div><div class="quick-link-title">${l.name}</div></div>`;
         else h += `<a class="quick-link" href="${l.url}" target="_blank"><div class="quick-link-icon" style="background:${l.color}"><i class="${l.icon}"></i></div><div class="quick-link-title">${l.name}</div></a>`;
     });
-    if(links.length<4) h += `<div class="quick-link add-link-btn" onclick="openAddLink()"><div class="quick-link-icon"><i class="fas fa-plus"></i></div><div class="quick-link-title">추가</div></div>`;
+    if(links.length<4) h += `<div class="quick-link add-link-btn" onclick="openAddLink()"><div class="quick-link-icon"><i class="fas fa-plus"></i></div><div class="quick-link-title" data-i18n="add">추가</div></div>`;
     g.innerHTML = h;
 }
 function updateEditLinkBtn(){
