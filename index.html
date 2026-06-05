@@ -6,35 +6,21 @@
     <title>TodayTab</title>
     <link rel="icon" type="image/png" href="icon-192.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Sunflower:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="common.css">
     <style>
-        :root {
-            --font: 'Sunflower', sans-serif;
-            --accent: #6366F1;
-            --accent-light: rgba(99,102,241,0.12);
-            --success: #10B981;
-            --danger: #EF4444;
-            --text-primary: rgba(0,0,0,0.80);
-            --text-secondary: rgba(0,0,0,0.55);
-            --text-muted: rgba(0,0,0,0.38);
-            --glass-bg: rgba(255,255,255,0.48);
-            --glass-border: rgba(255,255,255,0.82);
-            --glass-blur: blur(14px);
-            --radius-card: 8px;
-            --radius-icon: 8px;
-            --transition: all 0.2s ease;
+        /* ── 홈화면 고유 스타일 ── */
 
-            /* 봄 오로라 배경 (홈/할일) */
+        /* 오로라 배경 변수 */
+        :root {
+            /* 봄 오로라 A (홈/할일) */
             --bg-a: #f0ede8;
             --blob-a1: #a8e6cf; --blob-a2: #ffd3a5;
             --blob-a3: #d4b8f0; --blob-a4: #ffa07a;
-
-            /* 바다+노을 배경 (일기) */
+            /* 바다+노을 B (일기) */
             --bg-b: #eaf0f5;
             --blob-b1: #87ceeb; --blob-b2: #98e8c8;
             --blob-b3: #ffb347; --blob-b4: #ffb6c1;
-
-            /* 오렌지+민트+복숭아 배경 (가계부) */
+            /* 오렌지+민트 C (가계부) */
             --bg-c: #f5f0e8;
             --blob-c1: #ffa040; --blob-c2: #a8e6cf;
             --blob-c3: #ffd3a5; --blob-c4: #ffb6c1;
@@ -55,6 +41,7 @@
             max-width: 420px;
             min-height: 100vh;
             position: relative;
+            z-index: 1;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -69,6 +56,7 @@
             z-index: 0;
             overflow: hidden;
             transition: background 0.5s ease;
+            pointer-events: none;
         }
         .aurora-bg.theme-a { background: var(--bg-a); }
         .aurora-bg.theme-b { background: var(--bg-b); }
