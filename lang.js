@@ -27,6 +27,93 @@ const LANGUAGES = {
         thisYear: '올해',
         monthlyAvg: '월 평균',
         moodStats: '기분 통계',
+        page: '페이지',
+        todoList: '할 일 목록',
+        saveTodayScore: '오늘 점수 저장',
+        page: '페이지',
+        todoList: '할 일 목록',
+        saveTodayScore: '오늘 점수 저장',
+        goalPlaceholder: '이곳에 1년간의 성과 달성을 위한 목표와 포부를 기록해보세요...'
+        reflectPlaceholder: '목표 달성 과정에서의 성찰, 반성, 성취감 등을 자유롭게 기록해보세요...'
+        reminderPlaceholder: '예: 챙겨야 할 생일, 적금 만기일...'
+        msgPerfect: 'Perfect! 완벽한 하루! 🎊'
+        msgExcellent: 'Excellent! 훌륭해요! 💪'
+        msgGood: 'Good job! 잘하고 있어요! 👍'
+        msgKeep: 'Keep going! 화이팅! 🔥'
+        msgCan: 'You can do it! 할 수 있어요! ✨'
+        dateCol: '일자'
+        scoreCol: '점수'
+        gradeCol: '등급'
+        achieveCol: '달성률'
+        moodCol: '기분'
+        monthCol: '월'
+        avgScoreCol: '평균 점수'
+        cheerCol: '응원 메시지'
+        yearCol: '연도'
+        bestRateCol: '최고 달성률'
+        statusCol: '상태'
+        totalAvg: '총 평균 점수'
+        noData: '데이터 수집중'
+        thisMonthStats: '이번 달 달성 성과표'
+        yearlyStats: '연도별 성과 히스토리'
+        goalTitle: '나의 목표 & 성찰 일기'
+        goalLabel: '올해의 목표와 포부'
+        reflectLabel: '성찰과 달성 기록'
+        tipsTitle: '성공과 시간관리'
+        tipsSuccess: '성공 팁'
+        tipsTime: '시간관리 원칙'
+        resetAll: '모든 데이터 초기화'
+        reminderAdd: '리마인더 추가'
+        reminderList: '리마인더 목록'
+        reminderMemoLabel: '메모'
+        reminderToday: '오늘의 리마인더'
+        bgClick: '배경사진 클릭 +'
+        noTodos: '등록된 할 일이 없습니다'
+        noReminders: '등록된 리마인더가 없습니다'
+        expandStats: '통계 & 설정 페이지 펼치기 (2~7)'
+        collapseStats: '통계 & 설정 페이지 접기'
+        dailyReset: '매일 자정에 체크박스가 초기화됩니다'
+        creditMsg: '나의 신용도 점수, 꾸준히 쌓아가요 ✨'
+        jan: '1월'
+        feb: '2월'
+        mar: '3월'
+        apr: '4월'
+        may_: '5월'
+        jun_: '6월'
+        jul_: '7월'
+        aug_: '8월'
+        sep_: '9월'
+        oct_: '10월'
+        nov_: '11월'
+        dec_: '12월'
+        alertNoScore: '저장할 점수가 없습니다!'
+        alertNoTodo: '할 일을 입력해주세요!'
+        alertMax5: '최대 5개까지만 추가할 수 있습니다.\n기존 항목을 삭제해주세요.'
+        alertDeleteTodo: '이 할 일을 삭제하시겠습니까?'
+        alertSaved: '저장되었습니다! ✨'
+        alertNoContent: '저장할 내용이 없습니다!'
+        alertCleared: '내용이 지워졌습니다.'
+        alertClearConfirm: '입력된 내용을 모두 지우시겠습니까?'
+        alertSaveError: '저장 중 오류가 발생했습니다.'
+        alertDateReq: '날짜를 선택해주세요!'
+        alertMemoReq: '메모를 입력해주세요!'
+        alertReminderAdded: '리마인더가 추가되었습니다! 🔔'
+        alertDeleteReminder: '이 리마인더를 삭제하시겠습니까?'
+        alertBgChanged: '배경 사진이 변경되었습니다! 🌸'
+        alertMicPerm: '마이크 사용 권한이 필요합니다.'
+        alertNoSpeech: '이 브라우저는 음성 인식을 지원하지 않습니다.\n크롬 또는 엣지 브라우저를 사용해주세요.'
+        alertAllDeleted: '모든 데이터가 삭제되었습니다.'
+        alertNewDay: '📋 새로운 하루입니다!\n\n완료된 ${count}개 항목이 정리되었습니다.\n미완료 항목은 그대로 유지됩니다.'
+        savedStatus: '✅ 저장됨 - 수정하려면 "수정하기" 버튼을 누르세요'
+        editingStatus: '📝 편집 중 - 변경사항을 저장하세요'
+        msg0: '오늘의 목표를 달성하고 점수를 획득하세요!'
+        addTodo: '추가'
+        clear: '입력 지우기'
+        editBtn: '수정하기'
+                expand: '펼치기 ▶',
+        yardExpand: '마당 펼치기',
+        cardEditMode: '✏️ 카드 편집',
+        usageGuide: '사용 안내',
         
         // Navigation
         home: '홈',
@@ -239,6 +326,16 @@ const LANGUAGES = {
         backup: 'Backup', restore: 'Restore', download: 'Download', upload: 'Upload',
         complete: 'Done', total: 'Total', thisMonth: 'This Month', thisYear: 'This Year',
         monthlyAvg: 'Monthly Avg', moodStats: 'Mood Stats',
+        page: 'Page',
+        todoList: 'Todo List',
+        saveTodayScore: 'Save Score',
+        page: 'Page',
+        todoList: 'Todo List',
+        saveTodayScore: 'Save Score',
+        expand: 'Expand ▶',
+        yardExpand: 'Expand Section',
+        cardEditMode: '✏️ Edit Cards',
+        usageGuide: 'Usage Guide',
         
         home: 'Home', todo: 'Todo', diary: 'Diary', budget: 'Budget',
         
@@ -335,6 +432,48 @@ const LANGUAGES = {
         yearMonth: '{month} {year}',
         fullDate: '{weekday}, {month} {day}, {year}',
         currency: '$',
+        goalPlaceholder: 'Write your goals for this year...',
+        reflectPlaceholder: 'Write your reflection and achievements...',
+        reminderPlaceholder: 'e.g. Birthday, savings due...',
+        msgPerfect: 'Perfect! Amazing day! 🎊',
+        msgExcellent: 'Excellent! Great job! 💪',
+        msgGood: 'Good job! Keep it up! 👍',
+        msgKeep: 'Keep going! Fighting! 🔥',
+        msgCan: 'You can do it! ✨',
+        dateCol: 'Date', scoreCol: 'Score', gradeCol: 'Grade', achieveCol: 'Rate',
+        moodCol: 'Mood', monthCol: 'Month', avgScoreCol: 'Avg Score', cheerCol: 'Message',
+        yearCol: 'Year', bestRateCol: 'Best Rate', statusCol: 'Status', totalAvg: 'Overall Avg',
+        noData: 'Collecting...', thisMonthStats: 'Monthly Achievement',
+        monthlyStats: 'Monthly Statistics', yearlyStats: 'Yearly History',
+        goalTitle: 'My Goals & Reflection', goalLabel: 'Goals & Ambitions',
+        reflectLabel: 'Reflection & Achievement', tipsTitle: 'Success & Time Management',
+        tipsSuccess: 'Success Tips', tipsTime: 'Time Management',
+        resetAll: 'Reset All Data', reminderAdd: 'Add Reminder',
+        reminderList: 'Reminders', reminderMemoLabel: 'Memo',
+        reminderToday: 'Today\'s Reminders', bgClick: 'Click background +',
+        noTodos: 'No todos', noReminders: 'No reminders',
+        expandStats: 'Expand Statistics (2~7)', collapseStats: 'Collapse Statistics',
+        dailyReset: 'Checkboxes reset at midnight',
+        creditMsg: 'Build your credit score steadily ✨',
+        jan:'Jan', feb:'Feb', mar:'Mar', apr:'Apr', may_:'May', jun_:'Jun',
+        jul_:'Jul', aug_:'Aug', sep_:'Sep', oct_:'Oct', nov_:'Nov', dec_:'Dec',
+        alertNoScore: 'No score to save!', alertNoTodo: 'Please enter a todo!',
+        alertMax5: 'Max 5 items.\nPlease delete existing items.',
+        alertDeleteTodo: 'Delete this todo?', alertSaved: 'Saved! ✨',
+        alertNoContent: 'No content to save!', alertCleared: 'Content cleared.',
+        alertClearConfirm: 'Clear all content?', alertSaveError: 'Error saving data.',
+        alertDateReq: 'Please select a date!', alertMemoReq: 'Please enter a memo!',
+        alertReminderAdded: 'Reminder added! 🔔', alertDeleteReminder: 'Delete this reminder?',
+        alertBgChanged: 'Background changed! 🌸', alertMicPerm: 'Microphone permission required.',
+        alertNoSpeech: 'Speech recognition not supported.\nPlease use Chrome or Edge.',
+        alertAllDeleted: 'All data deleted.',
+        alertNewDay: '📋 New day!\n\n${count} completed items cleared.\nIncomplete items remain.',
+        savedStatus: '✅ Saved - Click "Edit" to modify',
+        editingStatus: '📝 Editing - Please save changes',
+        todoList: 'Todo List', addTodo: 'Add', page: 'Page',
+        save: 'Save', clear: 'Clear', editBtn: 'Edit', confirm: 'Confirm',
+        todayScore: "Today\'s Score", saveTodayScore: 'Save Score',
+        msg0: 'Complete your goals and earn points!',
         currencyFormat: '${amount}'
     },
     
@@ -441,7 +580,59 @@ const LANGUAGES = {
         yearMonth: '{year}年{month}',
         fullDate: '{year}年{month}{day}日 ({weekday})',
         currency: '円',
-        currencyFormat: '{amount}円'
+        currencyFormat: '{amount}円',
+        page: 'ページ',
+        todoList: 'タスクリスト',
+        saveTodayScore: 'スコアを保存',
+        page: 'ページ',
+        todoList: 'タスクリスト',
+        saveTodayScore: 'スコアを保存',
+        expand: '展開 ▶',
+        yardExpand: '庭を展開',
+        cardEditMode: '✏️ カード編集',
+        goalPlaceholder: '今年の目標と抱負を記録してください...',
+        reflectPlaceholder: '振り返りと達成感を自由に記録...',
+        reminderPlaceholder: '例: 誕生日、満期日...',
+        msgPerfect: 'パーフェクト！完璧な一日！ 🎊',
+        msgExcellent: 'エクセレント！素晴らしい！ 💪',
+        msgGood: 'グッジョブ！よくできました！ 👍',
+        msgKeep: 'がんばって！ファイト！ 🔥',
+        msgCan: 'できるよ！頑張って！ ✨',
+        dateCol: '日付', scoreCol: 'スコア', gradeCol: '等級', achieveCol: '達成率',
+        moodCol: '気分', monthCol: '月', avgScoreCol: '平均スコア', cheerCol: '応援メッセージ',
+        yearCol: '年度', bestRateCol: '最高達成率', statusCol: '状態', totalAvg: '総平均スコア',
+        noData: 'データ収集中', thisMonthStats: '今月の達成成績表',
+        monthlyStats: '月別統計', yearlyStats: '年別履歴',
+        goalTitle: '私の目標と振り返り', goalLabel: '今年の目標と抱負',
+        reflectLabel: '振り返りと達成記録', tipsTitle: '成功と時間管理',
+        tipsSuccess: '成功のコツ', tipsTime: '時間管理の原則',
+        resetAll: 'データリセット', reminderAdd: 'リマインダー追加',
+        reminderList: 'リマインダーリスト', reminderMemoLabel: 'メモ',
+        reminderToday: '今日のリマインダー', bgClick: '背景写真クリック +',
+        noTodos: 'タスクがありません', noReminders: 'リマインダーがありません',
+        expandStats: '統計ページ展開 (2~7)', collapseStats: '統計ページを閉じる',
+        dailyReset: '毎日深夜にリセットされます',
+        creditMsg: '信用スコアを積み上げよう ✨',
+        jan:'1月', feb:'2月', mar:'3月', apr:'4月', may_:'5月', jun_:'6月',
+        jul_:'7月', aug_:'8月', sep_:'9月', oct_:'10月', nov_:'11月', dec_:'12月',
+        alertNoScore: '保存するスコアがありません！', alertNoTodo: 'タスクを入力してください！',
+        alertMax5: '最大5件まで。\n既存の項目を削除してください。',
+        alertDeleteTodo: 'このタスクを削除しますか？', alertSaved: '保存されました！ ✨',
+        alertNoContent: '保存する内容がありません！', alertCleared: '内容が消されました。',
+        alertClearConfirm: 'すべての内容を消しますか？', alertSaveError: '保存中にエラーが発生しました。',
+        alertDateReq: '日付を選択してください！', alertMemoReq: 'メモを入力してください！',
+        alertReminderAdded: 'リマインダーが追加されました！ 🔔', alertDeleteReminder: 'このリマインダーを削除しますか？',
+        alertBgChanged: '背景写真が変更されました！ 🌸', alertMicPerm: 'マイクの権限が必要です。',
+        alertNoSpeech: 'このブラウザは音声認識をサポートしていません。\nChromeまたはEdgeを使用してください。',
+        alertAllDeleted: 'データが削除されました。',
+        alertNewDay: '📋 新しい一日です！\n\n完了した${count}件が整理されました。\n未完了の項目はそのまま残ります。',
+        savedStatus: '✅ 保存済 - 修正するには「修正する」を押してください',
+        editingStatus: '📝 編集中 - 変更を保存してください',
+        todoList: 'タスクリスト', addTodo: '追加', page: 'ページ',
+        save: '保存する', clear: '入力を消す', editBtn: '修正する', confirm: '確認',
+        todayScore: '今日のスコア', saveTodayScore: 'スコアを保存',
+        msg0: '目標を達成してポイントを獲得しよう！',
+        usageGuide: '使用案内'
     },
     
     zh: {
@@ -546,7 +737,59 @@ const LANGUAGES = {
         yearMonth: '{year}年{month}',
         fullDate: '{year}年{month}{day}日 星期{weekday}',
         currency: '元',
-        currencyFormat: '{amount}元'
+        currencyFormat: '{amount}元',
+        page: '页面',
+        todoList: '待办列表',
+        saveTodayScore: '保存分数',
+        page: '页面',
+        todoList: '待办列表',
+        saveTodayScore: '保存分数',
+        expand: '展開 ▶',
+        yardExpand: '展開庭院',
+        cardEditMode: '✏️ 卡片編輯',
+        goalPlaceholder: '记录今年的目标与抱负...',
+        reflectPlaceholder: '自由记录反思与成就...',
+        reminderPlaceholder: '例如: 生日、到期日...',
+        msgPerfect: '完美！完美的一天！ 🎊',
+        msgExcellent: '优秀！太棒了！ 💪',
+        msgGood: '好样的！继续努力！ 👍',
+        msgKeep: '加油！继续努力！ 🔥',
+        msgCan: '你能做到！ ✨',
+        dateCol: '日期', scoreCol: '分数', gradeCol: '等级', achieveCol: '达成率',
+        moodCol: '心情', monthCol: '月', avgScoreCol: '平均分数', cheerCol: '鼓励消息',
+        yearCol: '年份', bestRateCol: '最高达成率', statusCol: '状态', totalAvg: '总平均分数',
+        noData: '数据收集中', thisMonthStats: '本月达成成绩',
+        monthlyStats: '月度统计', yearlyStats: '年度历史',
+        goalTitle: '我的目标与反思', goalLabel: '今年的目标与抱负',
+        reflectLabel: '反思与达成记录', tipsTitle: '成功与时间管理',
+        tipsSuccess: '成功技巧', tipsTime: '时间管理原则',
+        resetAll: '重置所有数据', reminderAdd: '添加提醒',
+        reminderList: '提醒列表', reminderMemoLabel: '备注',
+        reminderToday: '今日提醒', bgClick: '点击背景 +',
+        noTodos: '没有待办事项', noReminders: '没有提醒',
+        expandStats: '展开统计 (2~7)', collapseStats: '收起统计',
+        dailyReset: '每天午夜重置复选框',
+        creditMsg: '稳步积累你的信用分数 ✨',
+        jan:'1月', feb:'2月', mar:'3月', apr:'4月', may_:'5月', jun_:'6月',
+        jul_:'7月', aug_:'8月', sep_:'9月', oct_:'10月', nov_:'11月', dec_:'12月',
+        alertNoScore: '没有可保存的分数！', alertNoTodo: '请输入待办！',
+        alertMax5: '最多5项。\n请删除现有项目。',
+        alertDeleteTodo: '删除此待办？', alertSaved: '已保存！ ✨',
+        alertNoContent: '没有可保存的内容！', alertCleared: '内容已清除。',
+        alertClearConfirm: '清除所有内容？', alertSaveError: '保存时出错。',
+        alertDateReq: '请选择日期！', alertMemoReq: '请输入备注！',
+        alertReminderAdded: '提醒已添加！ 🔔', alertDeleteReminder: '删除此提醒？',
+        alertBgChanged: '背景已更改！ 🌸', alertMicPerm: '需要麦克风权限。',
+        alertNoSpeech: '此浏览器不支持语音识别。\n请使用Chrome或Edge。',
+        alertAllDeleted: '所有数据已删除。',
+        alertNewDay: '📋 新的一天！\n\n${count}个已完成项目已清除。\n未完成项目保持不变。',
+        savedStatus: '✅ 已保存 - 点击"修改"进行编辑',
+        editingStatus: '📝 编辑中 - 请保存更改',
+        todoList: '待办列表', addTodo: '添加', page: '页面',
+        save: '保存', clear: '清除', editBtn: '修改', confirm: '确认',
+        todayScore: '今日分数', saveTodayScore: '保存分数',
+        msg0: '完成目标并获得积分！',
+        usageGuide: '使用指南'
     }
 };
 

@@ -10,7 +10,7 @@
     <script src="lang.js"></script>
     <style>
         /* ── 할 일 - TodayTab 고유 스타일 ── */
-        html, body { background: transparent !important; }
+        body { background: #f0ede8; }
         
         .blob-1{width:210px;height:210px;top:-60px;left:-50px;background:#a8e6cf;}
         .blob-2{width:170px;height:170px;top:20px;right:-30px;background:#ffd3a5;}
@@ -128,7 +128,7 @@
     <!-- nav (접기 상태) -->
     <div class="nav-bar" id="navBar" style="display:none">
         <button class="nav-btn" id="prevBtn" onclick="changePage(-1)"><i class="fas fa-chevron-left"></i></button>
-        <span class="page-indicator">페이지 <span id="currentPageNum">1</span> / 7</span>
+        <span class="page-indicator"><span data-i18n="page">페이지</span> <span id="currentPageNum">1</span> / 7</span>
         <button class="nav-btn" id="nextBtn" onclick="changePage(1)"><i class="fas fa-chevron-right"></i></button>
     </div>
 
@@ -142,7 +142,7 @@
         <div class="card">
             <div class="add-todo-group">
                 <div class="input-wrapper">
-                    <input type="text" id="newTodo" class="todo-input" placeholder="할 일을 입력하세요..." data-i18n-placeholder="enterTodo" style="padding-right:44px">
+                    <input type="text" id="newTodo" class="todo-input" placeholder="할 일을 입력하세요..." data-i18n-placeholder="enterTodo" data-i18n-placeholder="enterTodo" style="padding-right:44px">
                     <button type="button" onclick="toggleVoiceInput('newTodo')" class="voice-btn"><i class="fas fa-microphone"></i></button>
                 </div>
                 <button class="btn btn-primary" onclick="addTodo()"><i class="fas fa-plus"></i> <span data-i18n="add">추가</span></button>
@@ -151,30 +151,30 @@
 
         <div class="card score-card">
             <div class="score-display">
-                <div class="label">오늘의 점수</div>
+                <div class="label" data-i18n="todayScore">오늘의 점수</div>
                 <div class="value"><span id="currentScore">0</span> / <span id="maxScore">0</span> P</div>
             </div>
             <div class="grade-display grade-f" id="gradeDisplay">
                 <i class="fas fa-trophy"></i>
                 <span id="gradeText">F</span>
             </div>
-            <p class="motivation-text" id="motivationText">오늘의 목표를 달성하고 점수를 획득하세요!</p>
+            <p class="motivation-text" id="motivationText" data-i18n="msg0">오늘의 목표를 달성하고 점수를 획득하세요!</p>
         </div>
 
         <div class="card">
-            <div class="card-title"><i class="fas fa-list-check"></i> 할 일 목록</div>
+            <div class="card-title"><i class="fas fa-list-check"></i> <span data-i18n="todoList">할 일 목록</span></div>
             <div class="todo-list" id="todoList">
                 <div class="empty-state"><i class="fas fa-clipboard-list"></i><p>등록된 할 일이 없습니다</p></div>
             </div>
-            <button class="btn-save" onclick="saveToStats()"><i class="fas fa-save"></i> <span data-i18n="saveTodayScore">오늘 점수 저장</span></button>
+            <button class="btn-save" onclick="saveToStats()"><i class="fas fa-save"></i> <span data-i18n="saveTodayScore"><span data-i18n="saveTodayScore">오늘 점수 저장</span></button>
         </div>
 
-        <div class="info-box"><i class="fas fa-info-circle"></i> 매일 자정에 체크박스가 초기화됩니다</div>
+        <div class="info-box"><i class="fas fa-info-circle"></i> <span data-i18n="dailyReset">매일 자정에 체크박스가 초기화됩니다</span></div>
 
         <div class="page-toggle-section">
             <button class="page-toggle-btn" id="pageToggleBtn" onclick="toggleExtraPages()">
                 <i class="fas fa-chevron-down" id="toggleIcon"></i>
-                <span id="toggleText">통계 & 설정 페이지 펼치기 (2~7)</span>
+                <span id="toggleText" data-i18n="expandStats">통계 & 설정 페이지 펼치기 (2~7)</span>
             </button>
         </div>
     </div>
@@ -185,7 +185,7 @@
             <div class="card-title" id="page2Title"><i class="fas fa-calendar-days"></i> 이번 달 달성 성과표</div>
             <div style="overflow-x:auto">
                 <table class="stats-table">
-                    <thead><tr><th>일자</th><th>점수</th><th>등급</th><th>달성률</th><th>기분</th></tr></thead>
+                    <thead><tr><th data-i18n="dateCol">일자</th><th data-i18n="scoreCol">점수</th><th data-i18n="gradeCol">등급</th><th data-i18n="achieveCol">달성률</th><th data-i18n="moodCol">기분</th></tr></thead>
                     <tbody id="dailyStatsBody"></tbody>
                 </table>
             </div>
@@ -198,12 +198,12 @@
             <div class="card-title"><i class="fas fa-chart-bar"></i> 월별 성과 통계</div>
             <div style="overflow-x:auto">
                 <table class="stats-table">
-                    <thead><tr><th>월</th><th>평균 점수</th><th>등급</th><th>응원 메시지</th></tr></thead>
+                    <thead><tr><th data-i18n="monthCol">월</th><th data-i18n="avgScoreCol">평균 점수</th><th data-i18n="gradeCol">등급</th><th data-i18n="cheerCol">응원 메시지</th></tr></thead>
                     <tbody id="monthlyStatsBody"></tbody>
                 </table>
             </div>
         </div>
-        <div class="bank-message"><i class="fas fa-credit-card"></i> 나의 신용도 점수, 꾸준히 쌓아가요 ✨</div>
+        <div class="bank-message"><i class="fas fa-credit-card"></i> <span data-i18n="creditMsg">나의 신용도 점수, 꾸준히 쌓아가요 ✨</span></div>
     </div>
 
     <!-- Page 4: 연도별 통계 -->
@@ -212,38 +212,38 @@
             <div class="card-title"><i class="fas fa-chart-line"></i> 연도별 성과 히스토리</div>
             <div style="overflow-x:auto">
                 <table class="stats-table">
-                    <thead><tr><th>연도</th><th>평균 점수</th><th>최고 달성률</th><th>등급</th><th>상태</th></tr></thead>
+                    <thead><tr><th data-i18n="yearCol">연도</th><th data-i18n="avgScoreCol">평균 점수</th><th data-i18n="bestRateCol">최고 달성률</th><th data-i18n="gradeCol">등급</th><th data-i18n="statusCol">상태</th></tr></thead>
                     <tbody id="yearlyStatsBody"></tbody>
                 </table>
             </div>
         </div>
         <div class="summary-card">
-            <div class="label"><i class="fas fa-trophy"></i> 총 평균 점수</div>
-            <div class="value" id="overallAvgScore">데이터 수집중</div>
+            <div class="label"><i class="fas fa-trophy"></i> <span data-i18n="totalAvg">총 평균 점수</span></div>
+            <div class="value" id="overallAvgScore" data-i18n="noData">데이터 수집중</div>
         </div>
     </div>
 
     <!-- Page 5: 목표 & 성찰 -->
     <div class="page-content" id="page5">
         <div class="card">
-            <div class="card-title"><i class="fas fa-bullseye"></i> 나의 목표 & 성찰 일기</div>
+            <div class="card-title"><i class="fas fa-bullseye"></i> <span data-i18n="goalTitle">나의 목표 & 성찰 일기</span></div>
             <div class="goal-section">
-                <label class="form-label"><i class="fas fa-lightbulb"></i> 올해의 목표와 포부</label>
+                <label class="form-label"><i class="fas fa-lightbulb"></i> <span data-i18n="goalLabel">올해의 목표와 포부</span></label>
                 <div class="textarea-wrapper">
-                    <textarea class="goal-textarea" id="goalBox" placeholder="이곳에 1년간의 성과 달성을 위한 목표와 포부를 기록해보세요..."></textarea>
+                    <textarea class="goal-textarea" id="goalBox" placeholder="이곳에 1년간의 성과 달성을 위한 목표와 포부를 기록해보세요..." data-i18n-placeholder="goalPlaceholder"></textarea>
                     <button type="button" onclick="toggleVoiceInput('goalBox')" class="voice-btn voice-btn-textarea"><i class="fas fa-microphone"></i></button>
                 </div>
             </div>
             <div class="goal-section">
-                <label class="form-label"><i class="fas fa-pen-fancy"></i> 성찰과 달성 기록</label>
+                <label class="form-label"><i class="fas fa-pen-fancy"></i> <span data-i18n="reflectLabel">성찰과 달성 기록</span></label>
                 <div class="textarea-wrapper">
-                    <textarea class="diary-textarea" id="diaryBox" placeholder="목표 달성 과정에서의 성찰, 반성, 성취감 등을 자유롭게 기록해보세요..."></textarea>
+                    <textarea class="diary-textarea" id="diaryBox" placeholder="목표 달성 과정에서의 성찰, 반성, 성취감 등을 자유롭게 기록해보세요..." data-i18n-placeholder="reflectPlaceholder"></textarea>
                     <button type="button" onclick="toggleVoiceInput('diaryBox')" class="voice-btn voice-btn-textarea"><i class="fas fa-microphone"></i></button>
                 </div>
             </div>
             <div class="status-box" id="savedStatus"></div>
             <div class="button-group">
-                <button class="btn btn-secondary" id="clearBtn" onclick="clearInputs()"><i class="fas fa-eraser"></i> 입력 지우기</button>
+                <button class="btn btn-secondary" id="clearBtn" onclick="clearInputs()"><i class="fas fa-eraser"></i> <span data-i18n="clear">입력 지우기</span></button>
                 <button class="btn btn-primary" id="saveEditBtn" onclick="handleSaveEdit()"><i class="fas fa-save"></i> 저장하기</button>
             </div>
         </div>
@@ -252,9 +252,9 @@
     <!-- Page 6: 팁 & 초기화 -->
     <div class="page-content" id="page6">
         <div class="card">
-            <div class="card-title"><i class="fas fa-lightbulb"></i> 성공과 시간관리</div>
+            <div class="card-title"><i class="fas fa-lightbulb"></i> <span data-i18n="tipsTitle">성공과 시간관리</span></div>
             <div class="tips-card">
-                <h3><i class="fas fa-star"></i> 성공 팁</h3>
+                <h3><i class="fas fa-star"></i> <span data-i18n="tipsSuccess">성공 팁</span></h3>
                 <ul>
                     <li><strong>회복력의 힘:</strong> 훌륭한 일을 하는 것은 매일의 기쁨과 행복에 관한 것이 아닙니다. 자신이 하는 일을 사랑하고 회복력을 갖는 것입니다.</li>
                     <li><strong>도전을 통한 성장:</strong> 너무 높은 기대치를 가진 사람들은 충분한 회복력을 갖지 못합니다. 성공의 열쇠는 회복력입니다.</li>
@@ -263,7 +263,7 @@
                 <div class="quote-author">- 젠슨 황 -</div>
             </div>
             <div class="tips-card">
-                <h3><i class="fas fa-clock"></i> 시간관리 원칙</h3>
+                <h3><i class="fas fa-clock"></i> <span data-i18n="tipsTime">시간관리 원칙</span></h3>
                 <ul>
                     <li><strong>작게 시작하기:</strong> 주어진 날에 아무것도 할 수 없다면 5분만이라도 하세요. 시작이 반입니다.</li>
                     <li><strong>우선순위 집중:</strong> 가장 중요한 3가지 작업을 먼저 완료하세요. 나머지는 그 다음입니다.</li>
@@ -272,7 +272,7 @@
             </div>
             <img src="./water-stone.jpg" alt="물방울이 바위를 뚫는다" style="display:block;margin:16px auto;max-width:100%;border-radius:var(--radius)" onerror="this.style.display='none'">
             <div class="reset-section">
-                <button class="btn-reset" onclick="resetAll()"><i class="fas fa-trash-alt"></i> 모든 데이터 초기화</button>
+                <button class="btn-reset" onclick="resetAll()"><i class="fas fa-trash-alt"></i> <span data-i18n="resetAll">모든 데이터 초기화</span></button>
             </div>
         </div>
     </div>
@@ -281,16 +281,16 @@
     <div class="page-content" id="page7" style="position:relative">
         <div class="bg-click-area" onclick="openImageViewer()"></div>
         <div class="card" style="position:relative;z-index:1">
-            <div class="card-title"><i class="fas fa-bell"></i> 리마인더 추가</div>
+            <div class="card-title"><i class="fas fa-bell"></i> <span data-i18n="reminderAdd">리마인더 추가</span></div>
             <div class="reminder-form">
                 <div class="form-group">
                     <label class="form-label"><i class="fas fa-calendar"></i> 날짜</label>
                     <input type="date" id="reminderDate" class="reminder-input">
                 </div>
                 <div class="form-group">
-                    <label class="form-label"><i class="fas fa-pen"></i> 메모</label>
+                    <label class="form-label"><i class="fas fa-pen"></i> <span data-i18n="reminderMemoLabel">메모</span></label>
                     <div class="reminder-input-wrapper">
-                        <input type="text" id="reminderMemo" class="reminder-input" placeholder="예: 챙겨야 할 생일, 적금 만기일..." style="padding-right:44px">
+                        <input type="text" id="reminderMemo" class="reminder-input" placeholder="예: 챙겨야 할 생일, 적금 만기일..." data-i18n-placeholder="reminderPlaceholder" style="padding-right:44px">
                         <button type="button" onclick="toggleVoiceInput('reminderMemo')" class="voice-btn"><i class="fas fa-microphone"></i></button>
                     </div>
                 </div>
@@ -298,13 +298,13 @@
             </div>
         </div>
         <div class="card" style="position:relative;z-index:1">
-            <div class="card-title"><i class="fas fa-list"></i> 리마인더 목록</div>
+            <div class="card-title"><i class="fas fa-list"></i> <span data-i18n="reminderList">리마인더 목록</span></div>
             <div id="reminderList">
                 <div class="empty-state"><i class="fas fa-bell-slash"></i><p>등록된 리마인더가 없습니다</p></div>
             </div>
         </div>
         <div class="bg-hint">
-            <span onclick="openImageViewer()"><i class="fas fa-image"></i> 배경사진 클릭 +</span>
+            <span onclick="openImageViewer()"><i class="fas fa-image"></i> <span data-i18n="bgClick">배경사진 클릭 +</span></span>
             <label class="bg-change-btn"><i class="fas fa-camera"></i> 사진선택 변경 가능<input type="file" id="bgImageInput" accept="image/*" onchange="changeBgImage(event)" style="display:none"></label>
         </div>
     </div>
@@ -318,7 +318,7 @@
     <!-- Reminder Popup -->
     <div class="reminder-popup" id="reminderPopup">
         <div class="reminder-popup-content">
-            <div class="reminder-popup-title"><i class="fas fa-bell"></i> 오늘의 리마인더</div>
+            <div class="reminder-popup-title"><i class="fas fa-bell"></i> <span data-i18n="reminderToday">오늘의 리마인더</span></div>
             <div id="reminderPopupList"></div>
             <button class="btn btn-primary btn-full" onclick="closeReminderPopup()" style="margin-top:14px">확인</button>
         </div>
@@ -371,12 +371,12 @@
     }
 
     function getMotivationalMessage(score) {
-        if(score>=100) return 'Perfect! 완벽한 하루! 🎊';
-        if(score>=80) return 'Excellent! 훌륭해요! 💪';
-        if(score>=60) return 'Good job! 잘하고 있어요! 👍';
-        if(score>=40) return 'Keep going! 계속 화이팅! 🔥';
-        if(score>=20) return 'You can do it! 할 수 있어요! ✨';
-        return '오늘의 목표를 달성하고 점수를 획득하세요!';
+        if(score>=100) return t('msgPerfect');
+        if(score>=80)  return t('msgExcellent');
+        if(score>=60)  return t('msgGood');
+        if(score>=40)  return t('msgKeep');
+        if(score>=20)  return t('msgCan');
+        return t('msg0');
     }
 
     function updateDateTime() {
@@ -399,7 +399,7 @@
             const todos=await db.todos.toArray();
             const done=todos.filter(t=>t.completed);
             for(const t of done) await db.todos.delete(t.id);
-            if(done.length>0) alert(`📋 새로운 하루입니다!\n\n완료된 ${done.length}개 항목이 정리되었습니다.\n미완료 항목은 그대로 유지됩니다.`);
+            if(done.length>0) alert(t('alertNewDay').replace('${count}', done.length));
             renderTodoList();
         } catch(e){console.error(e);}
     }
@@ -407,13 +407,13 @@
     async function addTodo() {
         const input=document.getElementById('newTodo');
         const text=input.value.trim();
-        if(!text){alert('할 일을 입력해주세요!');return;}
+        if(!text){alert(t('alertNoTodo'));return;}
         const count=await db.todos.count();
-        if(count>=5){alert('최대 5개까지만 추가할 수 있습니다.\n기존 항목을 삭제해주세요.');return;}
+        if(count>=5){alert(t('alertMax5'));return;}
         try {
             await db.todos.add({text,completed:false,date:new Date().toISOString(),score:DEFAULT_TODO_SCORE});
             input.value=''; renderTodoList();
-        } catch(e){alert('저장 중 오류가 발생했습니다.');console.error(e);}
+        } catch(e){alert(t('alertSaveError'));console.error(e);}
     }
 
     async function toggleComplete(id) {
@@ -424,7 +424,7 @@
     }
 
     async function deleteTodo(id) {
-        if(confirm('이 할 일을 삭제하시겠습니까?')){
+        if(confirm(t('alertDeleteTodo'))){
             try{await db.todos.delete(id);renderTodoList();}catch(e){console.error(e);}
         }
     }
@@ -441,7 +441,7 @@
         let cur=0,max=0;
 
         if(todos.length===0){
-            el.innerHTML='<div class="empty-state"><i class="fas fa-clipboard-list"></i><p>등록된 할 일이 없습니다</p></div>';
+            el.innerHTML=`<div class="empty-state"><i class="fas fa-clipboard-list"></i><p>${t('noTodos')}</p></div>`;
         } else {
             todos.forEach(todo=>{
                 const score=todo.score||DEFAULT_TODO_SCORE;
@@ -467,7 +467,7 @@
 
     function saveToStats() {
         const cur=parseInt(document.getElementById('currentScore').textContent);
-        if(cur===0){alert('저장할 점수가 없습니다!');return;}
+        if(cur===0){alert(t('alertNoScore'));return;}
         const t=new Date();
         const key=`${t.getFullYear()}-${t.getMonth()}-${t.getDate()}`;
         let data=JSON.parse(localStorage.getItem('todoStats')||'{}');
@@ -494,7 +494,7 @@
         const t=new Date(),y=t.getFullYear(),data=JSON.parse(localStorage.getItem('todoStats')||'{}');
         const tbody=document.getElementById('monthlyStatsBody'); if(!tbody)return;
         tbody.innerHTML='';
-        ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'].forEach((mn,m)=>{
+        [t('jan'),t('feb'),t('mar'),t('apr'),t('may_'),t('jun_'),t('jul_'),t('aug_'),t('sep_'),t('oct_'),t('nov_'),t('dec_')].forEach((mn,m)=>{
             let total=0,count=0;
             for(let k in data){const p=k.split('-');if(parseInt(p[0])===y&&parseInt(p[1])===m){total+=data[k].score;count++;}}
             const row=document.createElement('tr');
@@ -519,7 +519,7 @@
             tbody.appendChild(row);
         });
         const el=document.getElementById('overallAvgScore');
-        el.textContent=oc>0?`${(ot/oc).toFixed(1)}점 (등급: ${getGradeInfo(ot/oc).text})`:'데이터 수집중';
+        el.textContent=oc>0?`${(ot/oc).toFixed(1)}pt (${getGradeInfo(ot/oc).text})`:t('noData');
     }
 
     function loadSavedGoalData() {
@@ -534,23 +534,23 @@
         else{
             const goal=document.getElementById('goalBox').value.trim();
             const diary=document.getElementById('diaryBox').value.trim();
-            if(!goal&&!diary){alert('저장할 내용이 없습니다!');return;}
+            if(!goal&&!diary){alert(t('alertNoContent'));return;}
             localStorage.setItem('todoUserGoal',goal); localStorage.setItem('todoUserDiary',diary);
-            isEditMode=true; updateEditModeUI(); alert('저장되었습니다! ✨');
+            isEditMode=true; updateEditModeUI(); alert(t('alertSaved'));
         }
     }
 
     function updateEditModeUI() {
         const gb=document.getElementById('goalBox'),db2=document.getElementById('diaryBox'),sb=document.getElementById('saveEditBtn'),st=document.getElementById('savedStatus');
-        if(isEditMode){gb.readOnly=true;db2.readOnly=true;sb.innerHTML='<i class="fas fa-edit"></i> 수정하기';st.textContent='✅ 저장됨 - 수정하려면 "수정하기" 버튼을 누르세요';st.className='status-box saved';}
-        else{gb.readOnly=false;db2.readOnly=false;sb.innerHTML='<i class="fas fa-save"></i> 저장하기';const h=gb.value.trim()||db2.value.trim();st.textContent=h?'📝 편집 중 - 변경사항을 저장하세요':'';st.className=h?'status-box editing':'status-box';}
+        if(isEditMode){gb.readOnly=true;db2.readOnly=true;sb.innerHTML=`<i class="fas fa-edit"></i> ${t('editBtn')}`;st.textContent=t('savedStatus');st.className='status-box saved';}
+        else{gb.readOnly=false;db2.readOnly=false;sb.innerHTML=`<i class="fas fa-save"></i> ${t('save')}`;const h=gb.value.trim()||db2.value.trim();st.textContent=h?t('editingStatus'):'';st.className=h?'status-box editing':'status-box';}
     }
 
     function clearInputs() {
-        if(confirm('입력된 내용을 모두 지우시겠습니까?')){
+        if(confirm(t('alertClearConfirm'))){
             document.getElementById('goalBox').value=''; document.getElementById('diaryBox').value='';
             localStorage.removeItem('todoUserGoal'); localStorage.removeItem('todoUserDiary');
-            isEditMode=false; updateEditModeUI(); alert('내용이 지워졌습니다.');
+            isEditMode=false; updateEditModeUI(); alert(t('alertCleared'));
         }
     }
 
@@ -560,7 +560,7 @@
                 await db.todos.clear();
                 ['todoStats','todoUserGoal','todoUserDiary','todoLastCheckDate','todoCurrentScore','todoMaxScore'].forEach(k=>localStorage.removeItem(k));
                 if(window.parent!==window) window.parent.postMessage({type:'statsUpdate'},'*');
-                alert('모든 데이터가 삭제되었습니다.'); location.reload();
+                alert(t('alertAllDeleted')); location.reload();
             } catch(e){alert('오류가 발생했습니다: '+e.message);}
         }
     }
@@ -568,18 +568,18 @@
     function addReminder() {
         const date=document.getElementById('reminderDate').value;
         const memo=document.getElementById('reminderMemo').value.trim();
-        if(!date){alert('날짜를 선택해주세요!');return;}
-        if(!memo){alert('메모를 입력해주세요!');return;}
+        if(!date){alert(t('alertDateReq'));return;}
+        if(!memo){alert(t('alertMemoReq'));return;}
         let reminders=JSON.parse(localStorage.getItem('todoReminders')||'[]');
         reminders.push({id:Date.now(),date,memo});
         reminders.sort((a,b)=>new Date(a.date)-new Date(b.date));
         localStorage.setItem('todoReminders',JSON.stringify(reminders));
         document.getElementById('reminderMemo').value='';
-        renderReminderList(); alert('리마인더가 추가되었습니다! 🔔');
+        renderReminderList(); alert(t('alertReminderAdded'));
     }
 
     function deleteReminder(id) {
-        if(confirm('이 리마인더를 삭제하시겠습니까?')){
+        if(confirm(t('alertDeleteReminder'))){
             let r=JSON.parse(localStorage.getItem('todoReminders')||'[]');
             r=r.filter(x=>x.id!==id); localStorage.setItem('todoReminders',JSON.stringify(r)); renderReminderList();
         }
@@ -596,7 +596,7 @@
     function renderReminderList() {
         const el=document.getElementById('reminderList');
         const r=JSON.parse(localStorage.getItem('todoReminders')||'[]');
-        if(!r.length){el.innerHTML='<div class="empty-state"><i class="fas fa-bell-slash"></i><p>등록된 리마인더가 없습니다</p></div>';return;}
+        if(!r.length){el.innerHTML=`<div class="empty-state"><i class="fas fa-bell-slash"></i><p>${t('noReminders')}</p></div>`;return;}
         el.innerHTML='';
         r.forEach(rem=>{
             const d=calculateDday(rem.date),dt=getDdayText(d);
@@ -618,7 +618,7 @@
     function showReminderPopup(reminders) {
         document.getElementById('reminderPopupList').innerHTML=reminders.map(r=>{
             const ic=r.dday===0?'reminder-popup-item today':'reminder-popup-item overdue';
-            const st=r.dday===0?'🔔 오늘이에요!':`⚠️ ${Math.abs(r.dday)}일 지났어요!`;
+            const st=r.dday===0?'🔔 '+t('reminderTodayLabel')+'!':`⚠️ ${Math.abs(r.dday)}일 지났어요!`;
             const df=new Date(r.date).toLocaleDateString('ko-KR',{month:'long',day:'numeric'});
             return`<div class="${ic}"><div class="memo">${r.memo}</div><div class="status">${df} - ${st}</div></div>`;
         }).join('');
@@ -636,7 +636,7 @@
             localStorage.setItem('todoReminderBg',e.target.result);
             document.getElementById('page7').style.backgroundImage=`url('${e.target.result}')`;
             document.querySelector('#imageViewer img').src=e.target.result;
-            alert('배경 사진이 변경되었습니다! 🌸');
+            alert(t('alertBgChanged'));
         };
         reader.readAsDataURL(file);
     }
@@ -650,8 +650,8 @@
     function toggleExtraPages() {
         isExtraPagesOpen=!isExtraPagesOpen;
         const nb=document.getElementById('navBar'),btn=document.getElementById('pageToggleBtn'),tt=document.getElementById('toggleText'),ti=document.getElementById('toggleIcon');
-        if(isExtraPagesOpen){nb.style.display='flex';btn.classList.add('active');tt.textContent='통계 & 설정 페이지 접기';ti.className='fas fa-chevron-up';localStorage.setItem('todoExtraPagesOpen','true');}
-        else{nb.style.display='none';btn.classList.remove('active');tt.textContent='통계 & 설정 페이지 펼치기 (2~7)';ti.className='fas fa-chevron-down';localStorage.setItem('todoExtraPagesOpen','false');if(currentPageNum!==1){document.getElementById('page'+currentPageNum).classList.remove('active');currentPageNum=1;document.getElementById('page1').classList.add('active');document.getElementById('currentPageNum').textContent=1;}}
+        if(isExtraPagesOpen){nb.style.display='flex';btn.classList.add('active');tt.textContent=t('collapseStats');ti.className='fas fa-chevron-up';localStorage.setItem('todoExtraPagesOpen','true');}
+        else{nb.style.display='none';btn.classList.remove('active');tt.textContent=t('expandStats');ti.className='fas fa-chevron-down';localStorage.setItem('todoExtraPagesOpen','false');if(currentPageNum!==1){document.getElementById('page'+currentPageNum).classList.remove('active');currentPageNum=1;document.getElementById('page1').classList.add('active');document.getElementById('currentPageNum').textContent=1;}}
     }
 
     function loadExtraPagesState() {
@@ -667,7 +667,7 @@
     // 음성 입력
     let recognition=null,isRecording=false,currentVoiceTarget=null,currentVoiceBtn=null;
     function toggleVoiceInput(targetId){
-        if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){alert('이 브라우저는 음성 인식을 지원하지 않습니다.\n크롬 또는 엣지 브라우저를 사용해주세요.');return;}
+        if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){alert(t('alertNoSpeech'));return;}
         if(isRecording)stopVoiceInput();else startVoiceInput(targetId,event.target.closest('.voice-btn'));
     }
     function startVoiceInput(targetId,btn){
@@ -678,7 +678,7 @@
         currentVoiceTarget=document.getElementById(targetId); currentVoiceBtn=btn;
         recognition.onstart=()=>{isRecording=true;if(currentVoiceBtn){currentVoiceBtn.classList.add('recording');currentVoiceBtn.innerHTML='<i class="fas fa-stop"></i>';}};
         recognition.onresult=(e)=>{let t='';for(let i=e.resultIndex;i<e.results.length;i++)t+=e.results[i][0].transcript;if(currentVoiceTarget){if(currentVoiceTarget.tagName==='TEXTAREA')currentVoiceTarget.value+=t+' ';else currentVoiceTarget.value=t;}if(!recognition.continuous)stopVoiceInput();};
-        recognition.onerror=(e)=>{console.log('오류:',e.error);stopVoiceInput();if(e.error==='not-allowed')alert('마이크 사용 권한이 필요합니다.');};
+        recognition.onerror=(e)=>{console.log('오류:',e.error);stopVoiceInput();if(e.error==='not-allowed')alert(t('alertMicPerm'));};
         recognition.onend=()=>{if(isRecording&&recognition.continuous)recognition.start();else stopVoiceInput();};
         recognition.start();
     }
