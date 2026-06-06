@@ -296,6 +296,25 @@ body { font-family: var(--font); min-height: 100vh; overflow-x: hidden; }
         .image-viewer img{max-width:90%;max-height:90vh;border-radius:var(--radius);}
         .image-viewer-close{position:fixed;top:20px;right:20px;width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,0.2);color:white;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;}
     
+
+/* ── 범용 입력 스타일 (class 없는 input도 글래스 디자인) ── */
+input[type="text"], input[type="number"], input[type="date"], input[type="url"], input[type="search"], textarea, select {
+    font-family: var(--font);
+    font-size: 13px;
+    color: var(--text-primary);
+    background: rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.85);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    box-sizing: border-box;
+}
+input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, input[type="url"]:focus, input[type="search"]:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgba(255,255,255,0.78);
+}
+input[type="checkbox"] { width:auto; accent-color: var(--accent); }
+
 </style>
      
 </head>

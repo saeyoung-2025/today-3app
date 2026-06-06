@@ -261,6 +261,25 @@ body { font-family: var(--font); min-height: 100vh; overflow-x: hidden; }
         .image-preview-modal img{max-width:90%;max-height:90vh;border-radius:var(--radius);}
         .image-preview-close{position:fixed;top:20px;right:20px;width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,0.2);color:white;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;}
     
+
+/* ── 범용 입력 스타일 (class 없는 input도 글래스 디자인) ── */
+input[type="text"], input[type="number"], input[type="date"], input[type="url"], input[type="search"], textarea, select {
+    font-family: var(--font);
+    font-size: 13px;
+    color: var(--text-primary);
+    background: rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.85);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    box-sizing: border-box;
+}
+input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, input[type="url"]:focus, input[type="search"]:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgba(255,255,255,0.78);
+}
+input[type="checkbox"] { width:auto; accent-color: var(--accent); }
+
 </style>
    
 </head>
@@ -276,7 +295,7 @@ body { font-family: var(--font); min-height: 100vh; overflow-x: hidden; }
     <div class="page-header"><h1><i class="fas fa-wallet"></i> 记账本</h1></div>
     <div class="balance-card">
         <div class="balance-label" id="balanceLabel">余额</div>
-        <div class="balance-value" id="currentBalance">¥0</div>
+        <div class="balance-value" id="currentBalance">0元</div>
     </div>
     <div class="nav-bar">
         <button id="prevPageBtn" class="nav-btn"><i class="fas fa-chevron-left"></i></button>
@@ -308,20 +327,20 @@ body { font-family: var(--font); min-height: 100vh; overflow-x: hidden; }
         <div class="card">
             <div class="card-title"><i class="fas fa-chart-pie"></i> 月度摘要</div>
             <div class="stats-summary">
-                <div class="stat-item"><div class="label">收入</div><div class="value income" id="monthlyIncome">¥0</div></div>
-                <div class="stat-item"><div class="label">支出</div><div class="value expense" id="monthlyExpense">¥0</div></div>
-                <div class="stat-item"><div class="label">余额</div><div class="value balance" id="monthlyBalance">¥0</div></div>
+                <div class="stat-item"><div class="label">收入</div><div class="value income" id="monthlyIncome">0元</div></div>
+                <div class="stat-item"><div class="label">支出</div><div class="value expense" id="monthlyExpense">0元</div></div>
+                <div class="stat-item"><div class="label">余额</div><div class="value balance" id="monthlyBalance">0元</div></div>
             </div>
             <div class="chart-container"><canvas id="dailyExpenseChart"></canvas></div>
         </div>
         <div class="card">
             <div class="card-title"><i class="fas fa-list-ul"></i> 月度摘要 by Type</div>
             <div class="type-summary-table">
-                <div class="type-row income-row"><span class="type-label"><i class="fas fa-arrow-down"></i> 收入</span><span class="type-value" id="typeIncome">+¥0</span></div>
-                <div class="type-row expense-row"><span class="type-label"><i class="fas fa-utensils"></i> 一般支出</span><span class="type-value" id="typeExpense">-¥0</span></div>
-                <div class="type-row saving-row"><span class="type-label"><i class="fas fa-piggy-bank"></i> 储蓄</span><span class="type-value" id="typeSaving">-¥0</span></div>
-                <div class="type-row fixed-row"><span class="type-label"><i class="fas fa-file-invoice-dollar"></i> 固定支出</span><span class="type-value" id="typeFixed">-¥0</span></div>
-                <div class="type-row total-row"><span class="type-label"><i class="fas fa-coins"></i> 余额</span><span class="type-value" id="typeTotal">¥0</span></div>
+                <div class="type-row income-row"><span class="type-label"><i class="fas fa-arrow-down"></i> 收入</span><span class="type-value" id="typeIncome">+0元</span></div>
+                <div class="type-row expense-row"><span class="type-label"><i class="fas fa-utensils"></i> 一般支出</span><span class="type-value" id="typeExpense">-0元</span></div>
+                <div class="type-row saving-row"><span class="type-label"><i class="fas fa-piggy-bank"></i> 储蓄</span><span class="type-value" id="typeSaving">-0元</span></div>
+                <div class="type-row fixed-row"><span class="type-label"><i class="fas fa-file-invoice-dollar"></i> 固定支出</span><span class="type-value" id="typeFixed">-0元</span></div>
+                <div class="type-row total-row"><span class="type-label"><i class="fas fa-coins"></i> 余额</span><span class="type-value" id="typeTotal">0元</span></div>
             </div>
         </div>
     </div>
@@ -526,7 +545,7 @@ body { font-family: var(--font); min-height: 100vh; overflow-x: hidden; }
     const savedTheme = localStorage.getItem('today_app_theme');
     if (savedTheme === 'gray') document.body.classList.add('theme-gray');
 
-    function formatAmount(amount) { return '¥' + new Intl.NumberFormat('zh-CN').format(amount); }
+    function formatAmount(amount) { return new Intl.NumberFormat('zh-CN').format(amount) + '元'; }
 
     const db = new Dexie('BudgetAppDB_EN');
     db.version(6).stores({ budgets: '++id, date, type, amount, category', goals: 'id', fixedItems: '++id, type, name, amount, note', assetImages: '++id, name, type, imageData, createdAt' });
@@ -674,9 +693,9 @@ body { font-family: var(--font); min-height: 100vh; overflow-x: hidden; }
         document.getElementById('monthlyExpense').textContent = formatAmount(expense);
         document.getElementById('monthlyBalance').textContent = formatAmount(income - expense);
         document.getElementById('typeIncome').textContent = '+' + formatAmount(typeIncome);
-        document.getElementById('typeExpense').textContent = typeExpense > 0 ? '-' + formatAmount(typeExpense) : '¥0';
-        document.getElementById('typeSaving').textContent = typeSaving > 0 ? '-' + formatAmount(typeSaving) : '¥0';
-        document.getElementById('typeFixed').textContent = typeFixed > 0 ? '-' + formatAmount(typeFixed) : '¥0';
+        document.getElementById('typeExpense').textContent = typeExpense > 0 ? '-' + formatAmount(typeExpense) : '0元';
+        document.getElementById('typeSaving').textContent = typeSaving > 0 ? '-' + formatAmount(typeSaving) : '0元';
+        document.getElementById('typeFixed').textContent = typeFixed > 0 ? '-' + formatAmount(typeFixed) : '0元';
         const totalBalance = typeIncome - typeExpense - typeSaving - typeFixed;
         document.getElementById('typeTotal').textContent = (totalBalance >= 0 ? '+' : '') + formatAmount(totalBalance);
         localStorage.setItem('moneyMonthlyBalance', income - expense);
