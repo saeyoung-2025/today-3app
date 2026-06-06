@@ -311,6 +311,17 @@ const LANGUAGES = {
         expand: '펼치기 ▶',
         yardExpand: '마당 펼치기',
         cardEditMode: '✏️ 카드 편집',
+        infoLocal: '로컬 저장으로 오프라인에서도 사용 가능합니다',
+        infoSecure: '인터넷에 노출되지 않아 보안이 완벽합니다',
+        infoBackup: '백업은 메모장 저장 후 불러오기로 복원 가능합니다',
+        infoWarn: '백업 없이 디바이스 변경 시 자료가 삭제됩니다',
+        hideBtn: '숨기기',
+        linkAdd: '링크 추가',
+        linkEdit: '링크 편집',
+        nameLabel: '이름',
+        iconLabel: '아이콘',
+        colorLabel: '색상',
+        scoreLabel: '점수'
     },
     
     en: {
@@ -501,6 +512,17 @@ const LANGUAGES = {
         expand: 'Expand ▶',
         yardExpand: 'Expand Section',
         cardEditMode: '✏️ Edit Cards',
+        infoLocal: 'Works offline with local storage',
+        infoSecure: 'Perfectly secure, not exposed online',
+        infoBackup: 'Backup via notepad save and restore',
+        infoWarn: 'Data is lost when changing devices without backup',
+        hideBtn: 'Hide',
+        linkAdd: 'Add Link',
+        linkEdit: 'Edit Link',
+        nameLabel: 'Name',
+        iconLabel: 'Icon',
+        colorLabel: 'Color',
+        scoreLabel: 'Score'
     },
     
     ja: {
@@ -690,6 +712,17 @@ const LANGUAGES = {
         expand: '展開 ▶',
         yardExpand: '庭を展開',
         cardEditMode: '✏️ カード編集',
+        infoLocal: 'ローカル保存でオフラインでも使用可能',
+        infoSecure: 'インターネットに露出せず安全',
+        infoBackup: 'バックアップはメモ帳保存後に復元可能',
+        infoWarn: 'バックアップなしでデバイス変更時データ削除',
+        hideBtn: '隠す',
+        linkAdd: 'リンク追加',
+        linkEdit: 'リンク編集',
+        nameLabel: '名前',
+        iconLabel: 'アイコン',
+        colorLabel: '色',
+        scoreLabel: 'スコア'
     },
     
     zh: {
@@ -878,6 +911,17 @@ const LANGUAGES = {
         expand: '展開 ▶',
         yardExpand: '展開庭院',
         cardEditMode: '✏️ 卡片編輯',
+        infoLocal: '本地存储，离线也可使用',
+        infoSecure: '不暴露于网络，安全完善',
+        infoBackup: '备份可通过记事本保存后恢复',
+        infoWarn: '未备份更换设备时数据将删除',
+        hideBtn: '隐藏',
+        linkAdd: '添加链接',
+        linkEdit: '编辑链接',
+        nameLabel: '名称',
+        iconLabel: '图标',
+        colorLabel: '颜色',
+        scoreLabel: '分数'
     }
 };
 

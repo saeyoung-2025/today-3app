@@ -437,10 +437,10 @@
                 <i class="fas fa-info"></i>
                 <div class="info-tooltip">
                     <h4><i class="fas fa-lightbulb"></i> <span data-i18n="usageGuide">사용 안내</span></h4>
-                    <div class="info-item"><i class="fas fa-database"></i><span>로컬 저장으로 오프라인에서도 사용 가능합니다</span></div>
-                    <div class="info-item"><i class="fas fa-shield-halved"></i><span>인터넷에 노출되지 않아 보안이 완벽합니다</span></div>
-                    <div class="info-item"><i class="fas fa-cloud-arrow-up"></i><span>백업은 메모장 저장 후 불러오기로 복원 가능합니다</span></div>
-                    <div class="info-item"><i class="fas fa-triangle-exclamation"></i><span>백업 없이 디바이스 변경 시 자료가 삭제됩니다</span></div>
+                    <div class="info-item"><i class="fas fa-database"></i><span data-i18n="infoLocal">로컬 저장으로 오프라인에서도 사용 가능합니다</span></div>
+                    <div class="info-item"><i class="fas fa-shield-halved"></i><span data-i18n="infoSecure">인터넷에 노출되지 않아 보안이 완벽합니다</span></div>
+                    <div class="info-item"><i class="fas fa-cloud-arrow-up"></i><span data-i18n="infoBackup">백업은 메모장 저장 후 불러오기로 복원 가능합니다</span></div>
+                    <div class="info-item"><i class="fas fa-triangle-exclamation"></i><span data-i18n="infoWarn">백업 없이 디바이스 변경 시 자료가 삭제됩니다</span></div>
                     <div class="info-contact"><p>TodayTab</p><a href="https://mail.google.com/mail/?view=cm&fs=1&to=todaytab.help@gmail.com" target="_blank">todaytab.help@gmail.com</a></div>
                 </div>
             </button>
@@ -549,7 +549,7 @@
             <div class="logo-banner-section" id="logoBannerSection">
                 <div class="logo-banner-container" id="logoBannerContainer">
                     <img src="logo-banner.png" alt="TodayTab" class="logo-banner-img" onclick="showHideButton()">
-                    <button class="logo-banner-hide-btn" onclick="toggleLogoBanner()"><i class="fas fa-eye-slash"></i> 숨기기</button>
+                    <button class="logo-banner-hide-btn" onclick="toggleLogoBanner()"><i class="fas fa-eye-slash"></i> <span data-i18n="hideBtn">숨기기</span></button>
                 </div>
                 <div id="logoSmallContainer" style="display:none"><img src="logo-small.png" class="logo-small-img" onclick="toggleLogoBanner()"></div>
                 <div class="bike-toggle-mini" id="bikeToggleMini" onclick="openBikeMode()"><canvas id="miniBikeCanvas" width="200" height="60"></canvas></div>
@@ -557,7 +557,7 @@
                 <div class="rose-toggle-mini" id="roseToggleMini" onclick="closeBikeMode()"><img src="logo-small.png" alt=""></div>
             </div>
         </div>
-        <div class="yard-restore" id="yardRestore" onclick="toggleYard()"><i class="fas fa-chevron-down"></i> 마당 펼치기</div>
+        <div class="yard-restore" id="yardRestore" onclick="toggleYard()"><i class="fas fa-chevron-down"></i> <span data-i18n="yardExpand">마당 펼치기</span></div>
     </div>
 
     <!-- 서브 페이지 -->
@@ -568,14 +568,14 @@
     <!-- 링크 모달 -->
     <div class="link-modal" id="linkModal">
         <div class="link-modal-content">
-            <div class="link-modal-title" id="linkModalTitle"><i class="fas fa-plus"></i> 링크 추가</div>
-            <div class="link-form-group"><label>이름</label><input type="text" id="linkName" class="link-form-input" placeholder="예: 도서관"></div>
+            <div class="link-modal-title" id="linkModalTitle"><i class="fas fa-plus"></i> <span data-i18n="linkAdd">링크 추가</span></div>
+            <div class="link-form-group"><label data-i18n="nameLabel">이름</label><input type="text" id="linkName" class="link-form-input" placeholder="예: 도서관"></div>
             <div class="link-form-group"><label>URL</label><input type="url" id="linkUrl" class="link-form-input" placeholder="https://example.com"></div>
-            <div class="link-form-group"><label>아이콘</label><div class="icon-picker" id="iconPicker"></div></div>
-            <div class="link-form-group"><label>색상</label><div class="color-picker" id="colorPicker"></div></div>
-            <button class="link-btn link-btn-primary" onclick="saveLink()"><i class="fas fa-save"></i> 저장</button>
-            <button class="link-btn link-btn-danger" id="deleteLinkBtn" onclick="deleteLink()"><i class="fas fa-trash"></i> 삭제</button>
-            <button class="link-btn link-btn-secondary" onclick="closeLinkModal()">취소</button>
+            <div class="link-form-group"><label data-i18n="iconLabel">아이콘</label><div class="icon-picker" id="iconPicker"></div></div>
+            <div class="link-form-group"><label data-i18n="colorLabel">색상</label><div class="color-picker" id="colorPicker"></div></div>
+            <button class="link-btn link-btn-primary" onclick="saveLink()"><i class="fas fa-save"></i> <span data-i18n="save">저장</span></button>
+            <button class="link-btn link-btn-danger" id="deleteLinkBtn" onclick="deleteLink()"><i class="fas fa-trash"></i> <span data-i18n="delete">삭제</span></button>
+            <button class="link-btn link-btn-secondary" onclick="closeLinkModal()"><span data-i18n="cancel">취소</span></button>
         </div>
     </div>
 
@@ -667,7 +667,20 @@ document.addEventListener('DOMContentLoaded', () => {
     updateEditLinkBtn();
     loadCardVisibility();
     loadYardState();
+    restoreIframeLang();
 });
+
+// 첫 로드 시 저장된 언어로 iframe src 맞추기
+function restoreIframeLang(){
+    const lang = localStorage.getItem('appLanguage') || 'ko';
+    if(lang === 'ko') return; // 한국어면 기본 src 그대로
+    const suffix = lang==='en'?'-en':(lang==='ja'?'-ja':(lang==='zh'?'-zh':''));
+    const frames = {todoFrame:'todo', diaryFrame:'diary', moneyFrame:'money'};
+    for(const [id, base] of Object.entries(frames)){
+        const fr = document.getElementById(id);
+        if(fr) fr.src = base + suffix + '.html';
+    }
+}
 window.addEventListener('languageChanged', ()=>{ updateDateDisplay(); updateHomeStats(); renderQuickLinks(); updateEditLinkBtn(); });
 window.addEventListener('message', e => {
     if(e.data.type==='statsUpdate'||e.data.type==='goalUpdate') updateHomeStats();
@@ -717,7 +730,17 @@ function loadYardState(){
     }
 }
 
-    function tr(k,fb){ try{ const r=t(k); if(r&&r!==k) return r; }catch(e){} return fb; }
+    // 빠른 번역 함수 - lang.js 의존 없이 독립 동작
+    const QUICK_TRANS = {
+        add:      {ko:'추가',  en:'Add',  ja:'追加', zh:'添加'},
+        edit:     {ko:'편집',  en:'Edit', ja:'編集', zh:'编辑'},
+        complete: {ko:'완료',  en:'Done', ja:'完了', zh:'完成'},
+        expand:   {ko:'펼치기▶', en:'Expand▶', ja:'展開▶', zh:'展開▶'},
+    };
+    function tr(k, fb) {
+        const lang = localStorage.getItem('appLanguage') || 'ko';
+        return (QUICK_TRANS[k] && QUICK_TRANS[k][lang]) || fb;
+    }
 
 // ── 즐겨찾기 ─────────────────────────────────────────────────────────
 const ICONS = ['fas fa-book','fas fa-university','fas fa-school','fas fa-home','fas fa-shopping-cart','fas fa-coffee','fas fa-music','fas fa-film','fas fa-plane','fas fa-car','fas fa-heart','fas fa-star','fas fa-globe','fas fa-search','fas fa-envelope','fas fa-phone','fas fa-camera','fas fa-gamepad','fas fa-newspaper','fas fa-chart-line','fas fa-briefcase','fas fa-graduation-cap','fas fa-utensils','fas fa-hospital'];

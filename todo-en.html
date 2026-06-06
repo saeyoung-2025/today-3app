@@ -3,13 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Todo - TodayTab</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="common.css">
+    <title>To-Do - Today App</title>
+    <link rel="icon" type="image/png" href="icon-192.png">
     <script src="https://unpkg.com/dexie@3.2.3/dist/dexie.js"></script>
-    <script src="lang.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sunflower:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        /* ── Todo - TodayTab 고유 스타일 ── */
+/* ===== common.css ===== */
+/* ================================================
+   TodayTab - Common Stylesheet
+   공통 스타일시트 - 모든 앱 파일에서 사용
+   ================================================ */
+
+500;700&display=swap');
+
+/* ── CSS 변수 (공통) ── */
+:root {
+    --font: 'Sunflower', sans-serif;
+    --accent: #6366F1;
+    --success: #10B981;
+    --danger: #EF4444;
+    --warning: #F59E0B;
+    --saving: #3B82F6;
+    --text-primary: rgba(0,0,0,0.80);
+    --text-secondary: rgba(0,0,0,0.55);
+    --text-muted: rgba(0,0,0,0.38);
+    --glass-bg: rgba(255,255,255,0.50);
+    --glass-blur: blur(14px);
+    --radius: 8px;
+    --transition: all 0.2s ease;
+    --border-color: rgba(255,255,255,0.7);
+    --bg-card: rgba(255,255,255,0.55);
+    --bg-primary: rgba(255,255,255,0.35);
+}
+
+/* ── 기본 리셋 ── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font); min-height: 100vh; overflow-x: hidden; }
+
+/* ── 오로라 배경 공통 ── */
+.aurora {
+    position: fixed; inset: 0; z-index: 0;
+    overflow: hidden; pointer-events: none;
+}
+.blob { position: absolute; border-radius: 50%; filter: blur(50px); opacity: 0.55; }
+
+/* ── 컨테이너 ── */
+.container {
+    position: relative; z-index: 2;
+    max-width: 480px; margin: 0 auto;
+    padding: 16px 16px 80px;
+}
+
+/* ── 페이지 헤더 ── */
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.page-header h1 { font-size: 18px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+.page-header h1 i { color: var(--accent); }
+
+/* ── nav 바 ── */
+.nav-bar { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 14px; }
+.nav-btn {
+    width: 34px; height: 34px; border-radius: var(--radius);
+    border: none; background: var(--glass-bg); backdrop-filter: var(--glass-blur);
+    color: var(--text-secondary); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; transition: var(--transition);
+}
+.nav-btn:hover { background: rgba(255,255,255,0.75); color: var(--accent); }
+.nav-btn:disabled { opacity: 0.35; cursor: default; }
+.page-indicator { font-size: 13px; font-weight: 700; color: var(--text-secondary); }
+
+/* ── 글래스 카드 ── */
+.card {
+    background: var(--glass-bg); backdrop-filter: var(--glass-blur);
+    border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
+}
+.card-title {
+    font-size: 14px; font-weight: 700; color: var(--text-primary);
+    display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+}
+.card-title i { color: var(--accent); }
+
+/* ── 폼 요소 ── */
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 5px; }
+.form-input, .form-textarea, .form-select {
+    width: 100%; padding: 10px 14px;
+    background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.85);
+    border-radius: var(--radius); font-family: var(--font);
+    font-size: 13px; font-weight: 500; color: var(--text-primary);
+    transition: var(--transition);
+}
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+    outline: none; border-color: var(--accent); background: rgba(255,255,255,0.78);
+}
+.form-textarea { min-height: 80px; resize: vertical; line-height: 1.6; }
+.action-buttons { display: flex; gap: 8px; }
+.form-label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; }
+
+/* ── 버튼 ── */
+.btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px; border: none; border-radius: var(--radius);
+    font-family: var(--font); font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: var(--transition);
+}
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: #5254CC; }
+.btn-secondary { background: rgba(255,255,255,0.6); color: var(--text-secondary); backdrop-filter: var(--glass-blur); }
+.btn-secondary:hover { background: rgba(255,255,255,0.85); color: var(--accent); }
+.btn-success { background: var(--success); color: white; }
+.btn-success:hover { background: #059669; }
+.btn-danger { background: var(--danger); color: white; }
+.btn-danger:hover { background: #CC3333; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-full { width: 100%; justify-content: center; }
+
+/* ── 음성 버튼 ── */
+.voice-btn {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    width: 30px; height: 30px; border-radius: 50%; border: none;
+    background: var(--accent); color: white; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; transition: var(--transition);
+}
+.voice-btn.recording { background: var(--danger); animation: pulse 1s infinite; }
+.voice-btn-textarea { top: auto; bottom: 8px; transform: none; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+/* ── 빈 상태 ── */
+.empty-state { text-align: center; padding: 28px 16px; color: var(--text-muted); }
+.empty-state i { font-size: 2.2rem; margin-bottom: 10px; display: block; }
+.empty-state p { font-size: 12px; font-weight: 500; }
+
+/* ── 페이지 전환 ── */
+.page-content { display: none; }
+.page-content.active { display: block; }
+
+/* ── 모달 ── */
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; }
+.modal.active { display: flex; }
+.modal-content { background: rgba(255,255,255,0.92); backdrop-filter: var(--glass-blur); border-radius: 16px; padding: 24px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; position: relative; }
+.modal-close { position: absolute; top: 12px; right: 12px; width: 30px; height: 30px; border-radius: 50%; border: none; background: rgba(0,0,0,0.08); color: var(--text-secondary); cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
+.modal-title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; }
+
+/* ── 팝업 ── */
+.info-popup { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); backdrop-filter: blur(4px); z-index: 1100; align-items: center; justify-content: center; }
+.info-popup.active { display: flex; }
+.info-popup-content { background: rgba(255,255,255,0.95); border-radius: 16px; padding: 24px; width: 90%; max-width: 360px; }
+.info-popup-content h4 { font-size: 15px; font-weight: 700; margin-bottom: 10px; color: var(--text-primary); }
+.info-popup-content p { font-size: 12px; font-weight: 500; color: var(--text-secondary); line-height: 1.7; white-space: pre-line; margin-bottom: 14px; }
+
+/* ── 통계 박스 ── */
+.stat-box { background: rgba(255,255,255,0.55); border-radius: var(--radius); padding: 12px; text-align: center; }
+.stat-box .label { font-size: 11px; font-weight: 500; color: var(--text-muted); margin-bottom: 4px; }
+.stat-box .value { font-size: 22px; font-weight: 700; color: var(--accent); }
+
+/* ── 목표 표시 ── */
+.goal-display { background: rgba(255,255,255,0.55); border-radius: var(--radius); padding: 14px; font-size: 13px; font-weight: 500; color: var(--text-primary); line-height: 1.7; white-space: pre-wrap; margin-bottom: 12px; }
+
+/* ── 섹션 박스 ── */
+.section-box { background: rgba(255,255,255,0.4); border-radius: var(--radius); overflow: hidden; margin-bottom: 10px; }
+.section-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; }
+.section-items { padding: 8px; }
+.empty-section { text-align: center; padding: 12px; font-size: 12px; font-weight: 500; color: var(--text-muted); }
+.fixed-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: rgba(255,255,255,0.55); border-radius: var(--radius); margin-bottom: 6px; }
+.item-info { flex: 1; }
+.item-name { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.item-note { font-size: 11px; font-weight: 300; color: var(--text-muted); margin-top: 2px; }
+.item-amount { font-size: 13px; font-weight: 700; margin: 0 10px; }
+.item-actions { display: flex; gap: 6px; }
+
+/* ── 요약 박스 ── */
+.summary-box { background: rgba(255,255,255,0.55); border-radius: var(--radius); padding: 14px; }
+.summary-title { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 10px; }
+.summary-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; }
+.summary-row.with-border { border-top: 1px solid rgba(255,255,255,0.7); margin-top: 4px; padding-top: 10px; }
+.summary-row.highlight { background: rgba(99,102,241,0.08); border-radius: var(--radius); padding: 8px 10px; margin-top: 6px; }
+.summary-row .label { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+.summary-row .value { font-size: 13px; font-weight: 700; }
+.summary-row .value.positive { color: var(--success); }
+.summary-row .value.negative { color: var(--danger); }
+
+/* ── 색상 유틸리티 ── */
+.income, .income-text { color: var(--success); }
+.expense, .expense-text { color: var(--danger); }
+.saving-text { color: var(--saving); }
+.fixed-text { color: var(--warning); }
+
+/* ── 스크롤바 ── */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
+
+
+/* ===== todo app style ===== */
+
+        /* ── 할 일 - TodayTab 고유 스타일 ── */
         body { background: #f0ede8; }
         
         .blob-1{width:210px;height:210px;top:-60px;left:-50px;background:#a8e6cf;}
@@ -109,10 +298,11 @@
         .image-viewer.active{display:flex;}
         .image-viewer img{max-width:90%;max-height:90vh;border-radius:var(--radius);}
         .image-viewer-close{position:fixed;top:20px;right:20px;width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,0.2);color:white;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;}
-    </style>
+    
+</style>
+     
 </head>
 <body>
-<!-- 오로라 배경 A -->
 <div class="aurora">
     <div class="blob" style="width:210px;height:210px;top:-60px;left:-50px;background:#a8e6cf"></div>
     <div class="blob" style="width:170px;height:170px;top:20px;right:-30px;background:#ffd3a5"></div>
@@ -120,583 +310,1126 @@
     <div class="blob" style="width:150px;height:150px;bottom:60px;right:-20px;background:#ffa07a;opacity:0.4"></div>
 </div>
 
-<div class="container">
-    <div class="page-header">
-        <h1><i class="fas fa-check-circle"></i><span data-i18n="todo">Todo</span></h1>
-    </div>
-
-    <!-- nav (접기 상태) -->
-    <div class="nav-bar" id="navBar" style="display:none">
-        <button class="nav-btn" id="prevBtn" onclick="changePage(-1)"><i class="fas fa-chevron-left"></i></button>
-        <span class="page-indicator">페이지 <span id="currentPageNum">1</span> / 7</span>
-        <button class="nav-btn" id="nextBtn" onclick="changePage(1)"><i class="fas fa-chevron-right"></i></button>
-    </div>
-
-    <!-- Page 1 -->
-    <div class="page-content active" id="page1">
-        <div class="date-card">
-            <div class="date" id="currentDate"></div>
-            <div class="time" id="currentTime"></div>
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-check-circle"></i>To-Do</h1>
         </div>
 
-        <div class="card">
-            <div class="add-todo-group">
-                <div class="input-wrapper">
-                    <input type="text" id="newTodo" class="todo-input" placeholder="Todo을 입력하세요..." data-i18n-placeholder="enterTodo" style="padding-right:44px">
-                    <button type="button" onclick="toggleVoiceInput('newTodo')" class="voice-btn"><i class="fas fa-microphone"></i></button>
+        <!-- Navigation -->
+        <div class="nav-bar" id="navBar" style="display: none;">
+            <button class="nav-btn" id="prevBtn" onclick="changePage(-1)"><i class="fas fa-chevron-left"></i></button>
+            <span class="page-indicator">Page <span id="currentPageNum">1</span> / 7</span>
+            <button class="nav-btn" id="nextBtn" onclick="changePage(1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
+
+        <!-- Page 1: Daily Checklist -->
+        <div class="page-content active" id="page1">
+            <div class="date-card">
+                <div class="date" id="currentDate"></div>
+                <div class="time" id="currentTime"></div>
+            </div>
+
+            <div class="card">
+                <div class="add-todo-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="newTodo" placeholder="Enter a new task...">
+                        <button type="button" onclick="toggleVoiceInput('newTodo')" class="voice-btn" title="Voice input">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                    </div>
+                    <button class="btn btn-primary" onclick="addTodo()"><i class="fas fa-plus"></i> Add</button>
                 </div>
-                <button class="btn btn-primary" onclick="addTodo()"><i class="fas fa-plus"></i> <span data-i18n="add">추가</span></button>
+            </div>
+
+            <div class="card score-card">
+                <div class="score-display">
+                    <span class="label">Today's Score</span>
+                    <div class="value"><span id="currentScore">0</span> / <span id="maxScore">0</span> P</div>
+                </div>
+                <div class="grade-display grade-f" id="gradeDisplay">
+                    <i class="fas fa-trophy"></i>
+                    <span>Grade: <span id="gradeText">F</span></span>
+                </div>
+                <p class="motivation-text" id="motivationText">Complete your goals and earn points!</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><i class="fas fa-list-check"></i> Task List</div>
+                <div class="todo-list" id="todoList">
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>No tasks registered</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="save-section">
+                <button class="btn-save" onclick="saveToStats()"><i class="fas fa-save"></i> Save Today's Score</button>
+            </div>
+
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i> Checkboxes reset daily at midnight
+            </div>
+
+            <!-- Page toggle button -->
+            <div class="page-toggle-section">
+                <button class="page-toggle-btn" id="pageToggleBtn" onclick="toggleExtraPages()">
+                    <i class="fas fa-chevron-down" id="toggleIcon"></i>
+                    <span id="toggleText">Expand Stats & Settings (2~7)</span>
+                </button>
             </div>
         </div>
 
-        <div class="card score-card">
-            <div class="score-display">
-                <div class="label">Today's Score</div>
-                <div class="value"><span id="currentScore">0</span> / <span id="maxScore">0</span> P</div>
-            </div>
-            <div class="grade-display grade-f" id="gradeDisplay">
-                <i class="fas fa-trophy"></i>
-                <span id="gradeText">F</span>
-            </div>
-            <p class="motivation-text" id="motivationText">Complete your goals and earn points!</p>
-        </div>
-
-        <div class="card">
-            <div class="card-title"><i class="fas fa-list-check"></i> Todo 목록</div>
-            <div class="todo-list" id="todoList">
-                <div class="empty-state"><i class="fas fa-clipboard-list"></i><p>등록된 Todo이 없습니다</p></div>
-            </div>
-            <button class="btn-save" onclick="saveToStats()"><i class="fas fa-save"></i> <span data-i18n="saveTodayScore">Save Score</span></button>
-        </div>
-
-        <div class="info-box"><i class="fas fa-info-circle"></i> Checkboxes reset at midnight</div>
-
-        <div class="page-toggle-section">
-            <button class="page-toggle-btn" id="pageToggleBtn" onclick="toggleExtraPages()">
-                <i class="fas fa-chevron-down" id="toggleIcon"></i>
-                <span id="toggleText">Expand Statistics (2~7)</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Page 2: 일별 통계 -->
-    <div class="page-content" id="page2">
-        <div class="card">
-            <div class="card-title" id="page2Title"><i class="fas fa-calendar-days"></i> This Month Achievement</div>
-            <div style="overflow-x:auto">
+        <!-- Page 2: Daily Stats -->
+        <div class="page-content" id="page2">
+            <div class="card">
+                <div class="card-title" id="page2Title"><i class="fas fa-calendar-days"></i> Jan '26 Achievement Record</div>
                 <table class="stats-table">
-                    <thead><tr><th>일자</th><th>점수</th><th>등급</th><th>달성률</th><th>기분</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Score</th>
+                            <th>Grade</th>
+                            <th>Rate</th>
+                            <th>Mood</th>
+                        </tr>
+                    </thead>
                     <tbody id="dailyStatsBody"></tbody>
                 </table>
             </div>
         </div>
-    </div>
 
-    <!-- Page 3: 월별 통계 -->
-    <div class="page-content" id="page3">
-        <div class="card">
-            <div class="card-title"><i class="fas fa-chart-bar"></i> Monthly Statistics</div>
-            <div style="overflow-x:auto">
+        <!-- Page 3: Monthly Stats -->
+        <div class="page-content" id="page3">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-chart-bar"></i> Monthly Statistics</div>
                 <table class="stats-table">
-                    <thead><tr><th>월</th><th>평균 점수</th><th>등급</th><th>응원 메시지</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Avg Score</th>
+                            <th>Grade</th>
+                            <th>Message</th>
+                        </tr>
+                    </thead>
                     <tbody id="monthlyStatsBody"></tbody>
                 </table>
             </div>
+            <div class="bank-message">
+                <i class="fas fa-credit-card"></i> Build your credit score consistently ✨
+            </div>
         </div>
-        <div class="bank-message"><i class="fas fa-credit-card"></i> 나의 신용도 점수, 꾸준히 쌓아가요 ✨</div>
-    </div>
 
-    <!-- Page 4: 연도별 통계 -->
-    <div class="page-content" id="page4">
-        <div class="card">
-            <div class="card-title"><i class="fas fa-chart-line"></i> Yearly History</div>
-            <div style="overflow-x:auto">
+        <!-- Page 4: Yearly Stats -->
+        <div class="page-content" id="page4">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-chart-line"></i> Yearly Performance History</div>
                 <table class="stats-table">
-                    <thead><tr><th>연도</th><th>평균 점수</th><th>최고 달성률</th><th>등급</th><th>상태</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>Year</th>
+                            <th>Avg Score</th>
+                            <th>Best Rate</th>
+                            <th>Grade</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
                     <tbody id="yearlyStatsBody"></tbody>
                 </table>
             </div>
+            <div class="summary-card">
+                <div class="label"><i class="fas fa-trophy"></i> Overall Average Score</div>
+                <div class="value" id="overallAvgScore">Collecting data</div>
+            </div>
         </div>
-        <div class="summary-card">
-            <div class="label"><i class="fas fa-trophy"></i> 총 평균 점수</div>
-            <div class="value" id="overallAvgScore">Collecting data</div>
-        </div>
-    </div>
 
-    <!-- Page 5: 목표 & 성찰 -->
-    <div class="page-content" id="page5">
-        <div class="card">
-            <div class="card-title"><i class="fas fa-bullseye"></i> My Goals & Reflection</div>
-            <div class="goal-section">
-                <label class="form-label"><i class="fas fa-lightbulb"></i> Goals & Ambitions</label>
-                <div class="textarea-wrapper">
-                    <textarea class="goal-textarea" id="goalBox" placeholder="Write your goals..."></textarea>
-                    <button type="button" onclick="toggleVoiceInput('goalBox')" class="voice-btn voice-btn-textarea"><i class="fas fa-microphone"></i></button>
-                </div>
-            </div>
-            <div class="goal-section">
-                <label class="form-label"><i class="fas fa-pen-fancy"></i> Reflection & Achievement</label>
-                <div class="textarea-wrapper">
-                    <textarea class="diary-textarea" id="diaryBox" placeholder="Write your reflection..."></textarea>
-                    <button type="button" onclick="toggleVoiceInput('diaryBox')" class="voice-btn voice-btn-textarea"><i class="fas fa-microphone"></i></button>
-                </div>
-            </div>
-            <div class="status-box" id="savedStatus"></div>
-            <div class="button-group">
-                <button class="btn btn-secondary" id="clearBtn" onclick="clearInputs()"><i class="fas fa-eraser"></i> Clear</button>
-                <button class="btn btn-primary" id="saveEditBtn" onclick="handleSaveEdit()"><i class="fas fa-save"></i> Save</button>
-            </div>
-        </div>
-    </div>
+        <!-- Page 5: Goals & Diary -->
+        <div class="page-content" id="page5">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-bullseye"></i> My Goals & Reflection Diary</div>
 
-    <!-- Page 6: 팁 & 초기화 -->
-    <div class="page-content" id="page6">
-        <div class="card">
-            <div class="card-title"><i class="fas fa-lightbulb"></i> Success & Time Management</div>
-            <div class="tips-card">
-                <h3><i class="fas fa-star"></i> 성공 팁</h3>
-                <ul>
-                    <li><strong>회복력의 힘:</strong> 훌륭한 일을 하는 것은 매일의 기쁨과 행복에 관한 것이 아닙니다. 자신이 하는 일을 사랑하고 회복력을 갖는 것입니다.</li>
-                    <li><strong>도전을 통한 성장:</strong> 너무 높은 기대치를 가진 사람들은 충분한 회복력을 갖지 못합니다. 성공의 열쇠는 회복력입니다.</li>
-                    <li><strong>노력의 가치:</strong> 나보다 더 똑똑한 사람이 있을 수 있지만, 나보다 더 열심히 일하는 사람은 절대 없을 것입니다.</li>
-                </ul>
-                <div class="quote-author">- 젠슨 황 -</div>
-            </div>
-            <div class="tips-card">
-                <h3><i class="fas fa-clock"></i> 시간관리 원칙</h3>
-                <ul>
-                    <li><strong>작게 시작하기:</strong> 주어진 날에 아무것도 할 수 없다면 5분만이라도 하세요. 시작이 반입니다.</li>
-                    <li><strong>우선순위 집중:</strong> 가장 중요한 3가지 작업을 먼저 완료하세요. 나머지는 그 다음입니다.</li>
-                    <li><strong>시간을 투자로:</strong> 젊음의 모든 순간은 자신에 대한 시간적 투자입니다. 현명하게 선택하세요.</li>
-                </ul>
-            </div>
-            <img src="./water-stone.jpg" alt="물방울이 바위를 뚫는다" style="display:block;margin:16px auto;max-width:100%;border-radius:var(--radius)" onerror="this.style.display='none'">
-            <div class="reset-section">
-                <button class="btn-reset" onclick="resetAll()"><i class="fas fa-trash-alt"></i> Reset All Data</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Page 7: 리마인더 -->
-    <div class="page-content" id="page7" style="position:relative">
-        <div class="bg-click-area" onclick="openImageViewer()"></div>
-        <div class="card" style="position:relative;z-index:1">
-            <div class="card-title"><i class="fas fa-bell"></i> Add Reminder</div>
-            <div class="reminder-form">
-                <div class="form-group">
-                    <label class="form-label"><i class="fas fa-calendar"></i> 날짜</label>
-                    <input type="date" id="reminderDate" class="reminder-input">
-                </div>
-                <div class="form-group">
-                    <label class="form-label"><i class="fas fa-pen"></i> 메모</label>
-                    <div class="reminder-input-wrapper">
-                        <input type="text" id="reminderMemo" class="reminder-input" placeholder="e.g. Birthday, savings due..." style="padding-right:44px">
-                        <button type="button" onclick="toggleVoiceInput('reminderMemo')" class="voice-btn"><i class="fas fa-microphone"></i></button>
+                <div class="goal-section">
+                    <label class="form-label"><i class="fas fa-lightbulb"></i> This Year's Goals and Aspirations</label>
+                    <div class="textarea-wrapper">
+                        <textarea class="goal-textarea" id="goalBox" placeholder="Write your goals and aspirations for the year here..."></textarea>
+                        <button type="button" onclick="toggleVoiceInput('goalBox')" class="voice-btn voice-btn-textarea" title="Voice input">
+                            <i class="fas fa-microphone"></i>
+                        </button>
                     </div>
                 </div>
-                <button class="btn btn-primary btn-full" onclick="addReminder()"><i class="fas fa-plus"></i> Add Reminder</button>
+
+                <div class="goal-section">
+                    <label class="form-label"><i class="fas fa-pen-fancy"></i> Reflections and Achievement Records</label>
+                    <div class="textarea-wrapper">
+                        <textarea class="diary-textarea" id="diaryBox" placeholder="Freely record your reflections, lessons learned, and accomplishments..."></textarea>
+                        <button type="button" onclick="toggleVoiceInput('diaryBox')" class="voice-btn voice-btn-textarea" title="Voice input">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="status-box" id="savedStatus"></div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" id="clearBtn" onclick="clearInputs()"><i class="fas fa-eraser"></i> Clear</button>
+                    <button class="btn btn-primary" id="saveEditBtn" onclick="handleSaveEdit()"><i class="fas fa-save"></i> Save</button>
+                </div>
             </div>
         </div>
-        <div class="card" style="position:relative;z-index:1">
-            <div class="card-title"><i class="fas fa-list"></i> Reminder List</div>
-            <div id="reminderList">
-                <div class="empty-state"><i class="fas fa-bell-slash"></i><p>No reminders</p></div>
+
+        <!-- Page 6: Tips & Reset -->
+        <div class="page-content" id="page6">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-lightbulb"></i> Success & Time Management</div>
+
+                <div class="tips-card">
+                    <h3><i class="fas fa-star"></i> Success Tips</h3>
+                    <ul>
+                        <li><strong>The Power of Resilience:</strong> Doing great work isn't about daily joy and happiness. It's about loving what you do and having resilience.</li>
+                        <li><strong>Growth Through Challenges:</strong> People with too high expectations don't have enough resilience. The key to success is resilience.</li>
+                        <li><strong>The Value of Effort:</strong> There may be someone smarter than me, but there will never be someone who works harder than me.</li>
+                    </ul>
+                    <div class="quote-author">- Jensen Huang -</div>
+                </div>
+
+                <div class="tips-card">
+                    <h3><i class="fas fa-clock"></i> Time Management Principles</h3>
+                    <ul>
+                        <li><strong>Start Small:</strong> If you can't do anything on a given day, do just 5 minutes. Starting is half the battle.</li>
+                        <li><strong>Focus on Priorities:</strong> Complete the 3 most important tasks first. Everything else comes after.</li>
+                        <li><strong>Time as Investment:</strong> Every moment of youth is a time investment in yourself. Choose wisely.</li>
+                    </ul>
+                </div>
+
+                <img src="./water-stone.jpg" alt="Water drops carve stone" style="display: block; margin: 20px auto; max-width: 100%; border-radius: var(--radius-md); box-shadow: var(--shadow-md);" onerror="this.style.display='none'">
+
+                <div class="reset-section">
+                    <button class="btn-reset" onclick="resetAll()">
+                        <i class="fas fa-trash-alt"></i> Reset All Data
+                    </button>
+                </div>
             </div>
         </div>
-        <div class="bg-hint">
-            <span onclick="openImageViewer()"><i class="fas fa-image"></i> 배경사진 클릭 +</span>
-            <label class="bg-change-btn"><i class="fas fa-camera"></i> 사진선택 변경 가능<input type="file" id="bgImageInput" accept="image/*" onchange="changeBgImage(event)" style="display:none"></label>
+
+        <!-- Page 7: Reminder -->
+        <div class="page-content" id="page7">
+            <div class="bg-click-area" onclick="openImageViewer()"></div>
+            <div class="card">
+                <div class="card-title"><i class="fas fa-bell"></i> Add Reminder</div>
+                <div class="reminder-form">
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-calendar"></i> Date</label>
+                        <input type="date" id="reminderDate" class="reminder-input" style="padding-right: 16px;">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-pen"></i> Memo</label>
+                        <div class="reminder-input-wrapper">
+                            <input type="text" id="reminderMemo" class="reminder-input" placeholder="e.g., Birthday, savings maturity date...">
+                            <button type="button" onclick="toggleVoiceInput('reminderMemo')" class="voice-btn" title="Voice input">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="addReminder()" style="width: 100%; margin-top: 12px;">
+                        <i class="fas fa-plus"></i> Add Reminder
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><i class="fas fa-list"></i> Reminder List</div>
+                <div id="reminderList">
+                    <div class="empty-state">
+                        <i class="fas fa-bell-slash"></i>
+                        <p>No reminders registered</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-hint">
+                <span onclick="openImageViewer()"><i class="fas fa-image"></i> Click background + </span>
+                <label class="bg-change-btn">
+                    <i class="fas fa-camera"></i> Change Photo
+                    <input type="file" id="bgImageInput" accept="image/*" onchange="changeBgImage(event)" style="display: none;">
+                </label>
+            </div>
+        </div>
+
+        <!-- Image Viewer -->
+        <div class="image-viewer" id="imageViewer" onclick="closeImageViewer()">
+            <button class="image-viewer-close" onclick="closeImageViewer()">
+                <i class="fas fa-times"></i>
+            </button>
+            <img src="./reminder-bg.jpg" alt="Background photo">
+        </div>
+
+        <!-- Reminder Popup -->
+        <div class="reminder-popup" id="reminderPopup">
+            <div class="reminder-popup-content">
+                <div class="reminder-popup-title"><i class="fas fa-bell"></i> Today's Reminders</div>
+                <div id="reminderPopupList"></div>
+                <button class="btn btn-primary" onclick="closeReminderPopup()" style="width: 100%; margin-top: 16px;">OK</button>
+            </div>
         </div>
     </div>
 
-    <!-- Image Viewer -->
-    <div class="image-viewer" id="imageViewer" onclick="closeImageViewer()">
-        <button class="image-viewer-close" onclick="closeImageViewer()"><i class="fas fa-times"></i></button>
-        <img src="./reminder-bg.jpg" alt="배경 사진">
-    </div>
+    <script>
+        // Theme handling from parent
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'themeChange') {
+                document.body.classList.remove('theme-gray');
+                if (event.data.theme === 'gray') {
+                    document.body.classList.add('theme-gray');
+                }
+            }
+        });
 
-    <!-- Reminder Popup -->
-    <div class="reminder-popup" id="reminderPopup">
-        <div class="reminder-popup-content">
-            <div class="reminder-popup-title"><i class="fas fa-bell"></i> 오늘의 리마인더</div>
-            <div id="reminderPopupList"></div>
-            <button class="btn btn-primary btn-full" onclick="closeReminderPopup()" style="margin-top:14px">확인</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    window.addEventListener('message', (e) => {
-        if(e.data.type==='themeChange'){
-            document.body.classList.remove('theme-gray');
-            if(e.data.theme==='gray') document.body.classList.add('theme-gray');
+        const savedTheme = localStorage.getItem('today_app_theme');
+        if (savedTheme === 'gray') {
+            document.body.classList.add('theme-gray');
         }
-    });
 
-    const db = new Dexie('TodayAppTodoDB_V2');
-    const DEFAULT_TODO_SCORE = 20;
-    db.version(1).stores({ todos:'++id, text, completed, date, score' });
+        // Database
+        const db = new Dexie('TodayAppTodoDB_V2');
+        const DEFAULT_TODO_SCORE = 20;
 
-    let currentPageNum=1, isEditMode=false;
+        db.version(1).stores({
+            todos: '++id, text, completed, date, score'
+        });
 
-    function changePage(dir) {
-        const np=currentPageNum+dir;
-        if(np>=1&&np<=7){
-            document.getElementById('page'+currentPageNum).classList.remove('active');
-            currentPageNum=np;
-            document.getElementById('page'+currentPageNum).classList.add('active');
-            document.getElementById('currentPageNum').textContent=currentPageNum;
-            document.getElementById('prevBtn').disabled=currentPageNum===1;
-            document.getElementById('nextBtn').disabled=currentPageNum===7;
-            if(currentPageNum===2){updatePage2Title();updateDailyStats();}
-            if(currentPageNum===3) updateMonthlyStats();
-            if(currentPageNum===4) updateYearlyStats();
-            if(currentPageNum===5) loadSavedGoalData();
+        // Variables
+        let currentPageNum = 1;
+        let isEditMode = false;
+
+        // Page Navigation
+        function changePage(dir) {
+            const newPage = currentPageNum + dir;
+            if (newPage >= 1 && newPage <= 7) {
+                document.getElementById(`page${currentPageNum}`).classList.remove('active');
+                currentPageNum = newPage;
+                document.getElementById(`page${currentPageNum}`).classList.add('active');
+                document.getElementById('currentPageNum').textContent = currentPageNum;
+
+                document.getElementById('prevBtn').disabled = currentPageNum === 1;
+                document.getElementById('nextBtn').disabled = currentPageNum === 7;
+
+                if (currentPageNum === 2) { updatePage2Title(); updateDailyStats(); }
+                if (currentPageNum === 3) updateMonthlyStats();
+                if (currentPageNum === 4) updateYearlyStats();
+                if (currentPageNum === 5) loadSavedGoalData();
+            }
         }
-    }
 
-    function updatePage2Title() {
-        const t=new Date();
-        document.getElementById('page2Title').innerHTML=`<i class="fas fa-calendar-days"></i> ${t.getFullYear().toString().slice(-2)}년 ${t.getMonth()+1}월의 달성 성과표`;
-    }
-
-    function getGradeInfo(score,forTable=false) {
-        if(score>=100) return{text:'S',class:'grade-s',emoji:forTable?'<span class="celebration-emoji">🎉</span>':'🎉'};
-        if(score>=90) return{text:'S',class:'grade-s',emoji:'🎉'};
-        if(score>=80) return{text:'A',class:'grade-a',emoji:'😄'};
-        if(score>=70) return{text:'B',class:'grade-b',emoji:'😊'};
-        if(score>=60) return{text:'C',class:'grade-c',emoji:'🙂'};
-        if(score>=50) return{text:'D',class:'grade-d',emoji:'😐'};
-        return{text:'F',class:'grade-f',emoji:'😢'};
-    }
-
-    function getMotivationalMessage(score) {
-        if(score>=100) return 'Perfect! 완벽한 하루! 🎊';
-        if(score>=80) return 'Excellent! 훌륭해요! 💪';
-        if(score>=60) return 'Good job! 잘하고 있어요! 👍';
-        if(score>=40) return 'Keep going! 계속 화이팅! 🔥';
-        if(score>=20) return 'You can do it! 할 수 있어요! ✨';
-        return 'Complete your goals and earn points!';
-    }
-
-    function updateDateTime() {
-        const now=new Date();
-        document.getElementById('currentDate').textContent=now.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
-        document.getElementById('currentTime').textContent=now.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
-        checkDateChange();
-    }
-
-    function checkDateChange() {
-        const t=new Date();
-        const today=`${t.getFullYear()}-${t.getMonth()}-${t.getDate()}`;
-        const last=localStorage.getItem('todoLastCheckDate');
-        if(last&&last!==today) resetDailyCheckboxes();
-        localStorage.setItem('todoLastCheckDate',today);
-    }
-
-    async function resetDailyCheckboxes() {
-        try {
-            const todos=await db.todos.toArray();
-            const done=todos.filter(t=>t.completed);
-            for(const t of done) await db.todos.delete(t.id);
-            if(done.length>0) alert(`📋 새로운 하루입니다!\n\n완료된 ${done.length}개 항목이 정리되었습니다.\n미완료 항목은 그대로 유지됩니다.`);
-            renderTodoList();
-        } catch(e){console.error(e);}
-    }
-
-    async function addTodo() {
-        const input=document.getElementById('newTodo');
-        const text=input.value.trim();
-        if(!text){alert('Todo을 입력해주세요!');return;}
-        const count=await db.todos.count();
-        if(count>=5){alert('최대 5개까지만 추가할 수 있습니다.\n기존 항목을 삭제해주세요.');return;}
-        try {
-            await db.todos.add({text,completed:false,date:new Date().toISOString(),score:DEFAULT_TODO_SCORE});
-            input.value=''; renderTodoList();
-        } catch(e){alert('저장 중 오류가 발생했습니다.');console.error(e);}
-    }
-
-    async function toggleComplete(id) {
-        try {
-            const todo=await db.todos.get(id);
-            if(todo){await db.todos.update(id,{completed:!todo.completed});renderTodoList();}
-        } catch(e){console.error(e);}
-    }
-
-    async function deleteTodo(id) {
-        if(confirm('이 Todo을 삭제하시겠습니까?')){
-            try{await db.todos.delete(id);renderTodoList();}catch(e){console.error(e);}
+        // Update Page 2 Title
+        function updatePage2Title() {
+            const t = new Date();
+            const y = t.getFullYear().toString().slice(-2);
+            const m = t.getMonth() + 1;
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            document.getElementById('page2Title').innerHTML = `<i class="fas fa-calendar-days"></i> ${monthNames[t.getMonth()]} '${y} Achievement Record`;
         }
-    }
 
-    async function renderTodoList() {
-        let todos=[];
-        try {
-            const all=await db.todos.orderBy('id').reverse().toArray();
-            todos=[...all.filter(t=>!t.completed),...all.filter(t=>t.completed)];
-        } catch(e){todos=[];}
+        // Grade Helpers
+        function getGradeInfo(score, forTable = false) {
+            if (score >= 100) return { text: 'S', class: 'grade-s', emoji: forTable ? '<span class="celebration-emoji">🎉</span>' : '🎉' };
+            if (score >= 90) return { text: 'S', class: 'grade-s', emoji: '🎉' };
+            if (score >= 80) return { text: 'A', class: 'grade-a', emoji: '😄' };
+            if (score >= 70) return { text: 'B', class: 'grade-b', emoji: '😊' };
+            if (score >= 60) return { text: 'C', class: 'grade-c', emoji: '🙂' };
+            if (score >= 50) return { text: 'D', class: 'grade-d', emoji: '😐' };
+            return { text: 'F', class: 'grade-f', emoji: '😢' };
+        }
 
-        const el=document.getElementById('todoList');
-        el.innerHTML='';
-        let cur=0,max=0;
+        function getMotivationalMessage(score) {
+            if (score >= 100) return 'Perfect! What an amazing day! 🎊';
+            if (score >= 80) return 'Excellent! Great job! 💪';
+            if (score >= 60) return 'Good job! Keep it up! 👍';
+            if (score >= 40) return 'Keep going! You got this! 🔥';
+            if (score >= 20) return 'You can do it! Stay strong! ✨';
+            return 'Complete your goals and earn points!';
+        }
 
-        if(todos.length===0){
-            el.innerHTML='<div class="empty-state"><i class="fas fa-clipboard-list"></i><p>등록된 Todo이 없습니다</p></div>';
-        } else {
-            todos.forEach(todo=>{
-                const score=todo.score||DEFAULT_TODO_SCORE;
-                max+=score; if(todo.completed) cur+=score;
-                const div=document.createElement('div');
-                div.className=`todo-item ${todo.completed?'done':''}`;
-                div.innerHTML=`<input type="checkbox" class="todo-checkbox" ${todo.completed?'checked':''} onclick="toggleComplete(${todo.id})"><div class="todo-content"><span class="todo-text">${todo.text}</span><span class="todo-points">${score}P</span></div><button class="todo-delete" onclick="deleteTodo(${todo.id})"><i class="fas fa-trash"></i></button>`;
-                el.appendChild(div);
+        // DateTime
+        function updateDateTime() {
+            const now = new Date();
+            const dateOptions = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', dateOptions);
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US', timeOptions);
+            checkDateChange();
+        }
+
+        function checkDateChange() {
+            const t = new Date();
+            const today = `${t.getFullYear()}-${t.getMonth()}-${t.getDate()}`;
+            const lastDate = localStorage.getItem('todoLastCheckDate');
+
+            if (lastDate && lastDate !== today) {
+                resetDailyCheckboxes();
+            }
+            localStorage.setItem('todoLastCheckDate', today);
+        }
+
+        async function resetDailyCheckboxes() {
+            try {
+                const todos = await db.todos.toArray();
+                const completedCount = todos.filter(t => t.completed).length;
+                
+                for (const todo of todos) {
+                    if (todo.completed) {
+                        await db.todos.delete(todo.id);
+                    }
+                }
+                
+                if (completedCount > 0) {
+                    alert(`📋 A new day has begun!\n\n${completedCount} completed tasks have been cleared.\nIncomplete tasks remain.`);
+                }
+                
+                renderTodoList();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // Todo Functions
+        async function addTodo() {
+            const input = document.getElementById('newTodo');
+            const text = input.value.trim();
+
+            if (!text) {
+                alert('Please enter a task!');
+                return;
+            }
+
+            const count = await db.todos.count();
+            if (count >= 5) {
+                alert('Maximum 5 tasks allowed.\nPlease delete existing tasks.');
+                return;
+            }
+
+            try {
+                await db.todos.add({
+                    text: text,
+                    completed: false,
+                    date: new Date().toISOString(),
+                    score: DEFAULT_TODO_SCORE
+                });
+                input.value = '';
+                renderTodoList();
+            } catch (e) {
+                alert('An error occurred while saving.');
+                console.error(e);
+            }
+        }
+
+        async function toggleComplete(id) {
+            try {
+                const todo = await db.todos.get(id);
+                if (todo) {
+                    await db.todos.update(id, { completed: !todo.completed });
+                    renderTodoList();
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function deleteTodo(id) {
+            if (confirm('Delete this task?')) {
+                try {
+                    await db.todos.delete(id);
+                    renderTodoList();
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+        }
+
+        async function renderTodoList() {
+            let todos = [];
+            try {
+                const allTodos = await db.todos.orderBy('id').reverse().toArray();
+                const uncompleted = allTodos.filter(t => !t.completed);
+                const completed = allTodos.filter(t => t.completed);
+                todos = [...uncompleted, ...completed];
+            } catch (e) {
+                todos = [];
+            }
+
+            const listEl = document.getElementById('todoList');
+            listEl.innerHTML = '';
+
+            let currentScore = 0;
+            let maxScore = 0;
+
+            if (todos.length === 0) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>No tasks registered</p>
+                    </div>
+                `;
+            } else {
+                todos.forEach(todo => {
+                    const score = todo.score || DEFAULT_TODO_SCORE;
+                    maxScore += score;
+                    if (todo.completed) currentScore += score;
+
+                    const item = document.createElement('div');
+                    item.className = `todo-item ${todo.completed ? 'done' : ''}`;
+                    item.innerHTML = `
+                        <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''} onclick="toggleComplete(${todo.id})">
+                        <div class="todo-content">
+                            <span class="todo-text">${todo.text}</span>
+                            <span class="todo-points">${score}P</span>
+                        </div>
+                        <button class="todo-delete" onclick="deleteTodo(${todo.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+                    listEl.appendChild(item);
+                });
+            }
+
+            document.getElementById('currentScore').textContent = currentScore;
+            document.getElementById('maxScore').textContent = maxScore;
+
+            const percentage = maxScore > 0 ? (currentScore / maxScore) * 100 : 0;
+            const gradeInfo = getGradeInfo(percentage);
+
+            document.getElementById('gradeText').textContent = gradeInfo.text;
+            const gradeEl = document.getElementById('gradeDisplay');
+            gradeEl.className = `grade-display ${gradeInfo.class}`;
+
+            document.getElementById('motivationText').textContent = getMotivationalMessage(percentage);
+
+            localStorage.setItem('todoCurrentScore', currentScore);
+            localStorage.setItem('todoMaxScore', maxScore);
+
+            if (window.parent !== window) {
+                window.parent.postMessage({ type: 'statsUpdate' }, '*');
+            }
+        }
+
+        // Save to Stats
+        function saveToStats() {
+            const currentScore = parseInt(document.getElementById('currentScore').textContent);
+            if (currentScore === 0) {
+                alert('No score to save!');
+                return;
+            }
+
+            const t = new Date();
+            const key = `${t.getFullYear()}-${t.getMonth()}-${t.getDate()}`;
+            let data = JSON.parse(localStorage.getItem('todoStats') || '{}');
+
+            data[key] = {
+                score: currentScore,
+                date: t.getDate(),
+                month: t.getMonth(),
+                year: t.getFullYear()
+            };
+
+            localStorage.setItem('todoStats', JSON.stringify(data));
+            alert(`${currentScore} points saved! 🎉\n\n💡 Completed tasks will be cleared tomorrow.\nIncomplete tasks remain.`);
+        }
+
+        // Daily Stats (Page 2)
+        function updateDailyStats() {
+            const t = new Date();
+            const m = t.getMonth();
+            const y = t.getFullYear();
+            const daysInMonth = new Date(y, m + 1, 0).getDate();
+            const tbody = document.getElementById('dailyStatsBody');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+            const data = JSON.parse(localStorage.getItem('todoStats') || '{}');
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const key = `${y}-${m}-${i}`;
+                const v = data[key];
+                const row = document.createElement('tr');
+
+                if (v) {
+                    const grade = getGradeInfo(v.score, true);
+                    row.innerHTML = `
+                        <td>${i}</td>
+                        <td>${v.score}</td>
+                        <td><span class="${grade.class}" style="padding:2px 8px;border-radius:4px;color:white;font-size:0.75rem;">${grade.text}</span></td>
+                        <td>${v.score}%</td>
+                        <td class="mood-emoji">${grade.emoji}</td>
+                    `;
+                } else {
+                    row.className = 'no-data';
+                    row.innerHTML = `<td>${i}</td><td>-</td><td>-</td><td>-</td><td>-</td>`;
+                }
+                tbody.appendChild(row);
+            }
+        }
+
+        // Monthly Stats (Page 3)
+        function updateMonthlyStats() {
+            const t = new Date();
+            const y = t.getFullYear();
+            const data = JSON.parse(localStorage.getItem('todoStats') || '{}');
+            const tbody = document.getElementById('monthlyStatsBody');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+            const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+            for (let m = 0; m < 12; m++) {
+                let total = 0, count = 0;
+                for (let k in data) {
+                    const parts = k.split('-');
+                    if (parseInt(parts[0]) === y && parseInt(parts[1]) === m) {
+                        total += data[k].score;
+                        count++;
+                    }
+                }
+
+                const row = document.createElement('tr');
+                if (count > 0) {
+                    const avg = total / count;
+                    const grade = getGradeInfo(avg);
+                    const msg = getMotivationalMessage(avg);
+                    row.innerHTML = `
+                        <td>${months[m]}</td>
+                        <td>${avg.toFixed(1)}</td>
+                        <td><span class="${grade.class}" style="padding:2px 8px;border-radius:4px;color:white;font-size:0.75rem;">${grade.text}</span></td>
+                        <td>${msg}</td>
+                    `;
+                } else {
+                    row.className = 'no-data';
+                    row.innerHTML = `<td>${months[m]}</td><td>-</td><td>-</td><td>-</td>`;
+                }
+                tbody.appendChild(row);
+            }
+        }
+
+        // Yearly Stats (Page 4)
+        function updateYearlyStats() {
+            const data = JSON.parse(localStorage.getItem('todoStats') || '{}');
+            const tbody = document.getElementById('yearlyStatsBody');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+            const cy = new Date().getFullYear();
+            const years = [cy, cy+1, cy+2, cy+3, cy+4];
+            let overallTotal = 0, overallCount = 0;
+
+            years.forEach(y => {
+                let yearTotal = 0, yearCount = 0, maxScore = 0;
+
+                for (let k in data) {
+                    if (parseInt(k.split('-')[0]) === y) {
+                        const s = data[k].score;
+                        yearTotal += s;
+                        yearCount++;
+                        if (s > maxScore) maxScore = s;
+                    }
+                }
+
+                const row = document.createElement('tr');
+                if (yearCount > 0) {
+                    const avg = yearTotal / yearCount;
+                    const grade = getGradeInfo(avg);
+                    overallTotal += yearTotal;
+                    overallCount += yearCount;
+                    row.innerHTML = `
+                        <td>${y}</td>
+                        <td>${avg.toFixed(1)}</td>
+                        <td>${maxScore}%</td>
+                        <td><span class="${grade.class}" style="padding:2px 8px;border-radius:4px;color:white;font-size:0.75rem;">${grade.text}</span></td>
+                        <td>🔥 Active</td>
+                    `;
+                } else {
+                    const status = y === cy ? '🔥 Active' : '🎯 Planning';
+                    row.className = y !== cy ? 'no-data' : '';
+                    row.innerHTML = `<td>${y}</td><td>-</td><td>-</td><td>-</td><td>${status}</td>`;
+                }
+                tbody.appendChild(row);
+            });
+
+            const overallEl = document.getElementById('overallAvgScore');
+            if (overallCount > 0) {
+                const avg = (overallTotal / overallCount).toFixed(1);
+                const grade = getGradeInfo(overallTotal / overallCount);
+                overallEl.textContent = `${avg} (Grade: ${grade.text})`;
+            } else {
+                overallEl.textContent = 'Collecting data';
+            }
+        }
+
+        // Goals & Diary (Page 5)
+        function loadSavedGoalData() {
+            const goal = localStorage.getItem('todoUserGoal') || '';
+            const diary = localStorage.getItem('todoUserDiary') || '';
+
+            document.getElementById('goalBox').value = goal;
+            document.getElementById('diaryBox').value = diary;
+
+            isEditMode = !!(goal || diary);
+            updateEditModeUI();
+        }
+
+        function handleSaveEdit() {
+            if (isEditMode) {
+                isEditMode = false;
+                updateEditModeUI();
+            } else {
+                const goal = document.getElementById('goalBox').value.trim();
+                const diary = document.getElementById('diaryBox').value.trim();
+
+                if (!goal && !diary) {
+                    alert('Nothing to save!');
+                    return;
+                }
+
+                localStorage.setItem('todoUserGoal', goal);
+                localStorage.setItem('todoUserDiary', diary);
+                isEditMode = true;
+                updateEditModeUI();
+                alert('Saved! ✨');
+            }
+        }
+
+        function updateEditModeUI() {
+            const goalBox = document.getElementById('goalBox');
+            const diaryBox = document.getElementById('diaryBox');
+            const saveBtn = document.getElementById('saveEditBtn');
+            const statusBox = document.getElementById('savedStatus');
+
+            if (isEditMode) {
+                goalBox.readOnly = true;
+                diaryBox.readOnly = true;
+                saveBtn.innerHTML = '<i class="fas fa-edit"></i> Edit';
+                statusBox.textContent = '✅ Saved - Click "Edit" to modify';
+                statusBox.className = 'status-box saved';
+            } else {
+                goalBox.readOnly = false;
+                diaryBox.readOnly = false;
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> Save';
+                const hasContent = goalBox.value.trim() || diaryBox.value.trim();
+                statusBox.textContent = hasContent ? '📝 Editing - Save your changes' : '';
+                statusBox.className = hasContent ? 'status-box editing' : 'status-box';
+            }
+        }
+
+        function clearInputs() {
+            if (isEditMode) {
+                if (confirm('Delete saved content?')) {
+                    document.getElementById('goalBox').value = '';
+                    document.getElementById('diaryBox').value = '';
+                    localStorage.removeItem('todoUserGoal');
+                    localStorage.removeItem('todoUserDiary');
+                    isEditMode = false;
+                    updateEditModeUI();
+                    alert('Content cleared.');
+                }
+            } else {
+                if (confirm('Clear all input?')) {
+                    document.getElementById('goalBox').value = '';
+                    document.getElementById('diaryBox').value = '';
+                    localStorage.removeItem('todoUserGoal');
+                    localStorage.removeItem('todoUserDiary');
+                    isEditMode = false;
+                    updateEditModeUI();
+                    alert('Content cleared.');
+                }
+            }
+        }
+
+        // Reset All
+        async function resetAll() {
+            if (confirm('⚠️ Delete all data?\n\nTasks, scores, and goals/diary will be permanently deleted.')) {
+                try {
+                    await db.todos.clear();
+                    localStorage.removeItem('todoStats');
+                    localStorage.removeItem('todoUserGoal');
+                    localStorage.removeItem('todoUserDiary');
+                    localStorage.removeItem('todoLastCheckDate');
+                    localStorage.removeItem('todoCurrentScore');
+                    localStorage.removeItem('todoMaxScore');
+
+                    if (window.parent !== window) {
+                        window.parent.postMessage({ type: 'statsUpdate' }, '*');
+                    }
+
+                    alert('All data has been deleted.');
+                    location.reload();
+                } catch (e) {
+                    alert('An error occurred: ' + e.message);
+                }
+            }
+        }
+
+        // ========== Reminder Functions ==========
+        
+        function addReminder() {
+            const dateInput = document.getElementById('reminderDate');
+            const memoInput = document.getElementById('reminderMemo');
+            
+            const date = dateInput.value;
+            const memo = memoInput.value.trim();
+            
+            if (!date) {
+                alert('Please select a date!');
+                return;
+            }
+            
+            if (!memo) {
+                alert('Please enter a memo!');
+                return;
+            }
+            
+            let reminders = JSON.parse(localStorage.getItem('todoReminders') || '[]');
+            
+            reminders.push({
+                id: Date.now(),
+                date: date,
+                memo: memo
+            });
+            
+            reminders.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            localStorage.setItem('todoReminders', JSON.stringify(reminders));
+            
+            memoInput.value = '';
+            
+            renderReminderList();
+            
+            alert('Reminder added! 🔔');
+        }
+        
+        function deleteReminder(id) {
+            if (confirm('Delete this reminder?')) {
+                let reminders = JSON.parse(localStorage.getItem('todoReminders') || '[]');
+                reminders = reminders.filter(r => r.id !== id);
+                localStorage.setItem('todoReminders', JSON.stringify(reminders));
+                renderReminderList();
+            }
+        }
+        
+        function calculateDday(dateStr) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const targetDate = new Date(dateStr);
+            targetDate.setHours(0, 0, 0, 0);
+            
+            const diff = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
+            
+            return diff;
+        }
+        
+        function getDdayText(dday) {
+            if (dday === 0) return 'Today';
+            if (dday < 0) return `D+${Math.abs(dday)}`;
+            return `D-${dday}`;
+        }
+        
+        function renderReminderList() {
+            const listEl = document.getElementById('reminderList');
+            const reminders = JSON.parse(localStorage.getItem('todoReminders') || '[]');
+            
+            if (reminders.length === 0) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-bell-slash"></i>
+                        <p>No reminders registered</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            listEl.innerHTML = '';
+            
+            reminders.forEach(reminder => {
+                const dday = calculateDday(reminder.date);
+                const ddayText = getDdayText(dday);
+                
+                let itemClass = 'reminder-item';
+                let ddayClass = 'reminder-dday';
+                
+                if (dday === 0) {
+                    itemClass += ' today';
+                    ddayClass += ' dday-today';
+                } else if (dday < 0) {
+                    itemClass += ' overdue';
+                    ddayClass += ' dday-overdue';
+                } else if (dday <= 7) {
+                    itemClass += ' upcoming';
+                    ddayClass += ' dday-upcoming';
+                }
+                
+                const dateObj = new Date(reminder.date);
+                const dateFormatted = dateObj.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    weekday: 'short'
+                });
+                
+                const item = document.createElement('div');
+                item.className = itemClass;
+                item.innerHTML = `
+                    <div class="reminder-info">
+                        <div class="reminder-memo">${reminder.memo}</div>
+                        <div class="reminder-date">${dateFormatted}</div>
+                    </div>
+                    <span class="${ddayClass}">${ddayText}</span>
+                    <button class="reminder-delete" onclick="deleteReminder(${reminder.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                
+                listEl.appendChild(item);
             });
         }
-
-        document.getElementById('currentScore').textContent=cur;
-        document.getElementById('maxScore').textContent=max;
-        const pct=max>0?(cur/max)*100:0;
-        const gi=getGradeInfo(pct);
-        document.getElementById('gradeText').textContent=gi.text;
-        document.getElementById('gradeDisplay').className=`grade-display ${gi.class}`;
-        document.getElementById('motivationText').textContent=getMotivationalMessage(pct);
-        localStorage.setItem('todoCurrentScore',cur);
-        localStorage.setItem('todoMaxScore',max);
-        if(window.parent!==window) window.parent.postMessage({type:'statsUpdate'},'*');
-    }
-
-    function saveToStats() {
-        const cur=parseInt(document.getElementById('currentScore').textContent);
-        if(cur===0){alert('No score to save!');return;}
-        const t=new Date();
-        const key=`${t.getFullYear()}-${t.getMonth()}-${t.getDate()}`;
-        let data=JSON.parse(localStorage.getItem('todoStats')||'{}');
-        data[key]={score:cur,date:t.getDate(),month:t.getMonth(),year:t.getFullYear()};
-        localStorage.setItem('todoStats',JSON.stringify(data));
-        alert(`${cur}점이 저장되었습니다! 🎉\n\n💡 체크(완료)된 항목은 익일부터 초기화 후 보이지 않습니다.\n미완료 항목은 계속 유지됩니다.`);
-    }
-
-    function updateDailyStats() {
-        const t=new Date(),m=t.getMonth(),y=t.getFullYear();
-        const days=new Date(y,m+1,0).getDate();
-        const tbody=document.getElementById('dailyStatsBody'); if(!tbody)return;
-        tbody.innerHTML='';
-        const data=JSON.parse(localStorage.getItem('todoStats')||'{}');
-        for(let i=1;i<=days;i++){
-            const key=`${y}-${m}-${i}`,v=data[key],row=document.createElement('tr');
-            if(v){const g=getGradeInfo(v.score,true);row.innerHTML=`<td>${i}일</td><td>${v.score}점</td><td><span class="${g.class}" style="padding:2px 8px;border-radius:4px;color:white;font-size:0.75rem">${g.text}</span></td><td>${v.score}%</td><td class="mood-emoji">${g.emoji}</td>`;}
-            else{row.className='no-data';row.innerHTML=`<td>${i}일</td><td>-</td><td>-</td><td>-</td><td>-</td>`;}
-            tbody.appendChild(row);
+        
+        function checkReminders() {
+            const reminders = JSON.parse(localStorage.getItem('todoReminders') || '[]');
+            const todayReminders = [];
+            
+            reminders.forEach(reminder => {
+                const dday = calculateDday(reminder.date);
+                if (dday <= 0) {
+                    todayReminders.push({
+                        ...reminder,
+                        dday: dday
+                    });
+                }
+            });
+            
+            if (todayReminders.length > 0) {
+                showReminderPopup(todayReminders);
+            }
         }
-    }
-
-    function updateMonthlyStats() {
-        const t=new Date(),y=t.getFullYear(),data=JSON.parse(localStorage.getItem('todoStats')||'{}');
-        const tbody=document.getElementById('monthlyStatsBody'); if(!tbody)return;
-        tbody.innerHTML='';
-        ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'].forEach((mn,m)=>{
-            let total=0,count=0;
-            for(let k in data){const p=k.split('-');if(parseInt(p[0])===y&&parseInt(p[1])===m){total+=data[k].score;count++;}}
-            const row=document.createElement('tr');
-            if(count>0){const avg=total/count,g=getGradeInfo(avg);row.innerHTML=`<td>${mn}</td><td>${avg.toFixed(1)}</td><td><span class="${g.class}" style="padding:2px 8px;border-radius:4px;color:white;font-size:0.75rem">${g.text}</span></td><td>${getMotivationalMessage(avg)}</td>`;}
-            else{row.className='no-data';row.innerHTML=`<td>${mn}</td><td>-</td><td>-</td><td>-</td>`;}
-            tbody.appendChild(row);
-        });
-    }
-
-    function updateYearlyStats() {
-        const data=JSON.parse(localStorage.getItem('todoStats')||'{}');
-        const tbody=document.getElementById('yearlyStatsBody'); if(!tbody)return;
-        tbody.innerHTML='';
-        const cy=new Date().getFullYear();
-        let ot=0,oc=0;
-        [cy,cy+1,cy+2,cy+3,cy+4].forEach(y=>{
-            let yt=0,yc=0,ms=0;
-            for(let k in data){if(parseInt(k.split('-')[0])===y){const s=data[k].score;yt+=s;yc++;if(s>ms)ms=s;}}
-            const row=document.createElement('tr');
-            if(yc>0){const avg=yt/yc,g=getGradeInfo(avg);ot+=yt;oc+=yc;row.innerHTML=`<td>${y}</td><td>${avg.toFixed(1)}점</td><td>${ms}%</td><td><span class="${g.class}" style="padding:2px 8px;border-radius:4px;color:white;font-size:0.75rem">${g.text}</span></td><td>🔥 Active</td>`;}
-            else{row.className=y!==cy?'no-data':'';row.innerHTML=`<td>${y}</td><td>-</td><td>-</td><td>-</td><td>${y===cy?'🔥 Active':'🎯 Planning'}</td>`;}
-            tbody.appendChild(row);
-        });
-        const el=document.getElementById('overallAvgScore');
-        el.textContent=oc>0?`${(ot/oc).toFixed(1)}점 (등급: ${getGradeInfo(ot/oc).text})`:'Collecting data';
-    }
-
-    function loadSavedGoalData() {
-        document.getElementById('goalBox').value=localStorage.getItem('todoUserGoal')||'';
-        document.getElementById('diaryBox').value=localStorage.getItem('todoUserDiary')||'';
-        isEditMode=!!(document.getElementById('goalBox').value||document.getElementById('diaryBox').value);
-        updateEditModeUI();
-    }
-
-    function handleSaveEdit() {
-        if(isEditMode){isEditMode=false;updateEditModeUI();}
-        else{
-            const goal=document.getElementById('goalBox').value.trim();
-            const diary=document.getElementById('diaryBox').value.trim();
-            if(!goal&&!diary){alert('저장할 내용이 없습니다!');return;}
-            localStorage.setItem('todoUserGoal',goal); localStorage.setItem('todoUserDiary',diary);
-            isEditMode=true; updateEditModeUI(); alert('Saved! ✨');
+        
+        function showReminderPopup(reminders) {
+            const popupList = document.getElementById('reminderPopupList');
+            popupList.innerHTML = '';
+            
+            reminders.forEach(reminder => {
+                const itemClass = reminder.dday === 0 ? 'reminder-popup-item today' : 'reminder-popup-item overdue';
+                const statusText = reminder.dday === 0 ? '🔔 Today!' : `⚠️ ${Math.abs(reminder.dday)} days overdue!`;
+                
+                const dateObj = new Date(reminder.date);
+                const dateFormatted = dateObj.toLocaleDateString('en-US', {
+                    month: 'long',
+                    day: 'numeric'
+                });
+                
+                popupList.innerHTML += `
+                    <div class="${itemClass}">
+                        <div class="memo">${reminder.memo}</div>
+                        <div class="status">${dateFormatted} - ${statusText}</div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('reminderPopup').classList.add('active');
         }
-    }
-
-    function updateEditModeUI() {
-        const gb=document.getElementById('goalBox'),db2=document.getElementById('diaryBox'),sb=document.getElementById('saveEditBtn'),st=document.getElementById('savedStatus');
-        if(isEditMode){gb.readOnly=true;db2.readOnly=true;sb.innerHTML='<i class="fas fa-edit"></i> Edit';st.textContent='✅ 저장됨 - 수정하려면 "Edit" 버튼을 누르세요';st.className='status-box saved';}
-        else{gb.readOnly=false;db2.readOnly=false;sb.innerHTML='<i class="fas fa-save"></i> Save';const h=gb.value.trim()||db2.value.trim();st.textContent=h?'📝 편집 중 - 변경사항을 저장하세요':'';st.className=h?'status-box editing':'status-box';}
-    }
-
-    function clearInputs() {
-        if(confirm('Clear all content?')){
-            document.getElementById('goalBox').value=''; document.getElementById('diaryBox').value='';
-            localStorage.removeItem('todoUserGoal'); localStorage.removeItem('todoUserDiary');
-            isEditMode=false; updateEditModeUI(); alert('Content cleared.');
+        
+        function closeReminderPopup() {
+            document.getElementById('reminderPopup').classList.remove('active');
         }
-    }
 
-    async function resetAll() {
-        if(confirm('⚠️ Delete all data?\n\nTodo 목록, 점수 기록, 목표/성찰 일기가 모두 삭제됩니다.')){
-            try {
-                await db.todos.clear();
-                ['todoStats','todoUserGoal','todoUserDiary','todoLastCheckDate','todoCurrentScore','todoMaxScore'].forEach(k=>localStorage.removeItem(k));
-                if(window.parent!==window) window.parent.postMessage({type:'statsUpdate'},'*');
-                alert('All data deleted.'); location.reload();
-            } catch(e){alert('오류가 발생했습니다: '+e.message);}
+        // Image viewer
+        function openImageViewer() {
+            document.getElementById('imageViewer').classList.add('active');
         }
-    }
 
-    function addReminder() {
-        const date=document.getElementById('reminderDate').value;
-        const memo=document.getElementById('reminderMemo').value.trim();
-        if(!date){alert('Please select a date!');return;}
-        if(!memo){alert('Please enter a memo!');return;}
-        let reminders=JSON.parse(localStorage.getItem('todoReminders')||'[]');
-        reminders.push({id:Date.now(),date,memo});
-        reminders.sort((a,b)=>new Date(a.date)-new Date(b.date));
-        localStorage.setItem('todoReminders',JSON.stringify(reminders));
-        document.getElementById('reminderMemo').value='';
-        renderReminderList(); alert('Reminder added! 🔔');
-    }
-
-    function deleteReminder(id) {
-        if(confirm('Delete this reminder?')){
-            let r=JSON.parse(localStorage.getItem('todoReminders')||'[]');
-            r=r.filter(x=>x.id!==id); localStorage.setItem('todoReminders',JSON.stringify(r)); renderReminderList();
+        function closeImageViewer() {
+            document.getElementById('imageViewer').classList.remove('active');
         }
-    }
 
-    function calculateDday(dateStr) {
-        const today=new Date(); today.setHours(0,0,0,0);
-        const target=new Date(dateStr); target.setHours(0,0,0,0);
-        return Math.ceil((target-today)/(1000*60*60*24));
-    }
+        // Background image change
+        function changeBgImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-    function getDdayText(d){if(d===0)return'오늘';if(d<0)return`D+${Math.abs(d)}`;return`D-${d}`;}
-
-    function renderReminderList() {
-        const el=document.getElementById('reminderList');
-        const r=JSON.parse(localStorage.getItem('todoReminders')||'[]');
-        if(!r.length){el.innerHTML='<div class="empty-state"><i class="fas fa-bell-slash"></i><p>No reminders</p></div>';return;}
-        el.innerHTML='';
-        r.forEach(rem=>{
-            const d=calculateDday(rem.date),dt=getDdayText(d);
-            let ic='reminder-item',dc='reminder-dday';
-            if(d===0){ic+=' today';dc+=' dday-today';}else if(d<0){ic+=' overdue';dc+=' dday-overdue';}else if(d<=7){ic+=' upcoming';dc+=' dday-upcoming';}
-            const df=new Date(rem.date).toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
-            const div=document.createElement('div'); div.className=ic;
-            div.innerHTML=`<div class="reminder-info"><div class="reminder-memo">${rem.memo}</div><div class="reminder-date">${df}</div></div><span class="${dc}">${dt}</span><button class="reminder-delete" onclick="deleteReminder(${rem.id})"><i class="fas fa-trash"></i></button>`;
-            el.appendChild(div);
-        });
-    }
-
-    function checkReminders() {
-        const r=JSON.parse(localStorage.getItem('todoReminders')||'[]');
-        const today=r.filter(x=>calculateDday(x.date)<=0).map(x=>({...x,dday:calculateDday(x.date)}));
-        if(today.length>0) showReminderPopup(today);
-    }
-
-    function showReminderPopup(reminders) {
-        document.getElementById('reminderPopupList').innerHTML=reminders.map(r=>{
-            const ic=r.dday===0?'reminder-popup-item today':'reminder-popup-item overdue';
-            const st=r.dday===0?'🔔 Today!':`⚠️ ${Math.abs(r.dday)}일 지났어요!`;
-            const df=new Date(r.date).toLocaleDateString('ko-KR',{month:'long',day:'numeric'});
-            return`<div class="${ic}"><div class="memo">${r.memo}</div><div class="status">${df} - ${st}</div></div>`;
-        }).join('');
-        document.getElementById('reminderPopup').classList.add('active');
-    }
-
-    function closeReminderPopup(){document.getElementById('reminderPopup').classList.remove('active');}
-    function openImageViewer(){document.getElementById('imageViewer').classList.add('active');}
-    function closeImageViewer(){document.getElementById('imageViewer').classList.remove('active');}
-
-    function changeBgImage(event) {
-        const file=event.target.files[0]; if(!file)return;
-        const reader=new FileReader();
-        reader.onload=function(e){
-            localStorage.setItem('todoReminderBg',e.target.result);
-            document.getElementById('page7').style.backgroundImage=`url('${e.target.result}')`;
-            document.querySelector('#imageViewer img').src=e.target.result;
-            alert('배경 사진이 변경되었습니다! 🌸');
-        };
-        reader.readAsDataURL(file);
-    }
-
-    function loadSavedBgImage() {
-        const bg=localStorage.getItem('todoReminderBg');
-        if(bg){document.getElementById('page7').style.backgroundImage=`url('${bg}')`;document.querySelector('#imageViewer img').src=bg;}
-    }
-
-    let isExtraPagesOpen=false;
-    function toggleExtraPages() {
-        isExtraPagesOpen=!isExtraPagesOpen;
-        const nb=document.getElementById('navBar'),btn=document.getElementById('pageToggleBtn'),tt=document.getElementById('toggleText'),ti=document.getElementById('toggleIcon');
-        if(isExtraPagesOpen){nb.style.display='flex';btn.classList.add('active');tt.textContent='Collapse Statistics';ti.className='fas fa-chevron-up';localStorage.setItem('todoExtraPagesOpen','true');}
-        else{nb.style.display='none';btn.classList.remove('active');tt.textContent='Expand Statistics (2~7)';ti.className='fas fa-chevron-down';localStorage.setItem('todoExtraPagesOpen','false');if(currentPageNum!==1){document.getElementById('page'+currentPageNum).classList.remove('active');currentPageNum=1;document.getElementById('page1').classList.add('active');document.getElementById('currentPageNum').textContent=1;}}
-    }
-
-    function loadExtraPagesState() {
-        if(localStorage.getItem('todoExtraPagesOpen')==='true'){
-            isExtraPagesOpen=true;
-            document.getElementById('navBar').style.display='flex';
-            document.getElementById('pageToggleBtn').classList.add('active');
-            document.getElementById('toggleText').textContent='Collapse Statistics';
-            document.getElementById('toggleIcon').className='fas fa-chevron-up';
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imageData = e.target.result;
+                
+                localStorage.setItem('todoReminderBg', imageData);
+                
+                document.getElementById('page7').style.backgroundImage = `url('${imageData}')`;
+                
+                document.querySelector('#imageViewer img').src = imageData;
+                
+                alert('Background image changed! 🌸');
+            };
+            reader.readAsDataURL(file);
         }
-    }
 
-    // 음성 입력
-    let recognition=null,isRecording=false,currentVoiceTarget=null,currentVoiceBtn=null;
-    function toggleVoiceInput(targetId){
-        if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){alert('이 브라우저는 음성 인식을 지원하지 않습니다.\n크롬 또는 엣지 브라우저를 사용해주세요.');return;}
-        if(isRecording)stopVoiceInput();else startVoiceInput(targetId,event.target.closest('.voice-btn'));
-    }
-    function startVoiceInput(targetId,btn){
-        const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-        recognition=new SR(); recognition.lang='ko-KR';
-        recognition.continuous=targetId==='goalBox'||targetId==='diaryBox';
-        recognition.interimResults=false;
-        currentVoiceTarget=document.getElementById(targetId); currentVoiceBtn=btn;
-        recognition.onstart=()=>{isRecording=true;if(currentVoiceBtn){currentVoiceBtn.classList.add('recording');currentVoiceBtn.innerHTML='<i class="fas fa-stop"></i>';}};
-        recognition.onresult=(e)=>{let t='';for(let i=e.resultIndex;i<e.results.length;i++)t+=e.results[i][0].transcript;if(currentVoiceTarget){if(currentVoiceTarget.tagName==='TEXTAREA')currentVoiceTarget.value+=t+' ';else currentVoiceTarget.value=t;}if(!recognition.continuous)stopVoiceInput();};
-        recognition.onerror=(e)=>{console.log('오류:',e.error);stopVoiceInput();if(e.error==='not-allowed')alert('마이크 사용 권한이 필요합니다.');};
-        recognition.onend=()=>{if(isRecording&&recognition.continuous)recognition.start();else stopVoiceInput();};
-        recognition.start();
-    }
-    function stopVoiceInput(){if(recognition){isRecording=false;recognition.stop();if(currentVoiceBtn){currentVoiceBtn.classList.remove('recording');currentVoiceBtn.innerHTML='<i class="fas fa-microphone"></i>';}currentVoiceTarget=null;currentVoiceBtn=null;}}
-    window.toggleVoiceInput=toggleVoiceInput;
+        function loadSavedBgImage() {
+            const savedBg = localStorage.getItem('todoReminderBg');
+            if (savedBg) {
+                document.getElementById('page7').style.backgroundImage = `url('${savedBg}')`;
+                document.querySelector('#imageViewer img').src = savedBg;
+            }
+        }
 
-    function init() {
-        document.getElementById('newTodo').addEventListener('keypress',e=>{if(e.key==='Enter')addTodo();});
-        document.getElementById('prevBtn').disabled=true;
-        document.getElementById('reminderDate').value=new Date().toISOString().split('T')[0];
-        updateDateTime(); setInterval(updateDateTime,1000);
-        renderTodoList(); renderReminderList();
-        loadSavedBgImage(); checkReminders();
-    }
+        // Page toggle
+        let isExtraPagesOpen = false;
 
-    window.onload=init;
-    window.toggleComplete=toggleComplete; window.deleteTodo=deleteTodo; window.deleteReminder=deleteReminder;
-    document.addEventListener('DOMContentLoaded',loadExtraPagesState);
-</script>
+        function toggleExtraPages() {
+            isExtraPagesOpen = !isExtraPagesOpen;
+            
+            const navBar = document.getElementById('navBar');
+            const toggleBtn = document.getElementById('pageToggleBtn');
+            const toggleText = document.getElementById('toggleText');
+            
+            if (isExtraPagesOpen) {
+                navBar.style.display = 'flex';
+                toggleBtn.classList.add('active');
+                toggleText.textContent = 'Collapse Stats & Settings';
+                localStorage.setItem('todoExtraPagesOpen', 'true');
+            } else {
+                navBar.style.display = 'none';
+                toggleBtn.classList.remove('active');
+                toggleText.textContent = 'Expand Stats & Settings (2~7)';
+                localStorage.setItem('todoExtraPagesOpen', 'false');
+                
+                if (currentPageNum !== 1) {
+                    document.getElementById(`page${currentPageNum}`).classList.remove('active');
+                    currentPageNum = 1;
+                    document.getElementById('page1').classList.add('active');
+                    document.getElementById('currentPageNum').textContent = 1;
+                }
+            }
+        }
+
+        function loadExtraPagesState() {
+            const saved = localStorage.getItem('todoExtraPagesOpen');
+            if (saved === 'true') {
+                isExtraPagesOpen = true;
+                document.getElementById('navBar').style.display = 'flex';
+                document.getElementById('pageToggleBtn').classList.add('active');
+                document.getElementById('toggleText').textContent = 'Collapse Stats & Settings';
+            }
+        }
+
+        // ========== Voice Input ==========
+        let recognition = null;
+        let isRecording = false;
+        let currentVoiceTarget = null;
+        let currentVoiceBtn = null;
+
+        function toggleVoiceInput(targetId) {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('This browser does not support voice recognition.\nPlease use Chrome or Edge.');
+                return;
+            }
+
+            if (isRecording) {
+                stopVoiceInput();
+            } else {
+                startVoiceInput(targetId, event.target.closest('.voice-btn'));
+            }
+        }
+
+        function startVoiceInput(targetId, btn) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.continuous = targetId === 'goalBox' || targetId === 'diaryBox';
+            recognition.interimResults = false;
+
+            currentVoiceTarget = document.getElementById(targetId);
+            currentVoiceBtn = btn;
+
+            recognition.onstart = () => {
+                isRecording = true;
+                if (currentVoiceBtn) {
+                    currentVoiceBtn.classList.add('recording');
+                    currentVoiceBtn.innerHTML = '<i class="fas fa-stop"></i>';
+                }
+            };
+
+            recognition.onresult = (event) => {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                if (currentVoiceTarget) {
+                    if (currentVoiceTarget.tagName === 'TEXTAREA') {
+                        currentVoiceTarget.value += transcript + ' ';
+                    } else {
+                        currentVoiceTarget.value = transcript;
+                    }
+                }
+                
+                if (!recognition.continuous) {
+                    stopVoiceInput();
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.log('Voice recognition error:', event.error);
+                stopVoiceInput();
+                if (event.error === 'not-allowed') {
+                    alert('Microphone permission required.\nPlease allow microphone in browser settings.');
+                }
+            };
+
+            recognition.onend = () => {
+                if (isRecording && recognition.continuous) {
+                    recognition.start();
+                } else {
+                    stopVoiceInput();
+                }
+            };
+
+            recognition.start();
+        }
+
+        function stopVoiceInput() {
+            if (recognition) {
+                isRecording = false;
+                recognition.stop();
+                if (currentVoiceBtn) {
+                    currentVoiceBtn.classList.remove('recording');
+                    currentVoiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                }
+                currentVoiceTarget = null;
+                currentVoiceBtn = null;
+            }
+        }
+        window.toggleVoiceInput = toggleVoiceInput;
+
+        // Initialize
+        function init() {
+            document.getElementById('newTodo').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addTodo();
+            });
+
+            document.getElementById('prevBtn').disabled = true;
+
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('reminderDate').value = today;
+
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            renderTodoList();
+            renderReminderList();
+            
+            loadSavedBgImage();
+            
+            checkReminders();
+        }
+
+        window.onload = init;
+        window.toggleComplete = toggleComplete;
+        window.deleteTodo = deleteTodo;
+        window.deleteReminder = deleteReminder;
+
+        document.addEventListener('DOMContentLoaded', loadExtraPagesState);
+    </script>
 </body>
 </html>
